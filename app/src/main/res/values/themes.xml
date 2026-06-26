@@ -1,0 +1,18 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.PharmacyTrack" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/pharmacy_primary</item>
+        <item name="colorPrimaryVariant">@color/pharmacy_primary_dark</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+
+        <item name="colorSecondary">@color/pharmacy_secondary</item>
+        <item name="colorOnSecondary">@android:color/white</item>
+
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">@color/pharmacy_background</item>
+        <item name="android:navigationBarColor">@color/pharmacy_background</item>
+
+        <item name="android:fontFamily">sans</item>
+    </style>
+
+</resources>

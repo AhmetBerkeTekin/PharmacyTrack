@@ -1,0 +1,38 @@
+<resources>
+    <!-- a -->
+    <string name="app_name">PharmacyTrack</string>
+    <string name="app_title">Nöbetçi Eczaneler</string>
+    <string name="app_subtitle">Şehir seç, en yakın nöbetçi eczaneleri görüntüle.</string>
+
+    <!-- b -->
+    <string name="button_search_pharmacies">Eczaneleri Getir</string>
+    <string name="button_loading">Yükleniyor...</string>
+    <string name="button_retry">Tekrar Dene</string>
+
+    <!-- c -->
+    <string name="city">Şehir</string>
+
+    <!-- e -->
+    <string name="error_phone_not_found">Telefon numarası bulunamadı.</string>
+    <string name="error_phone_app_not_found">Telefon uygulaması bulunamadı.</string>
+    <string name="error_address_not_found">Adres bilgisi bulunamadı.</string>
+    <string name="error_map_app_not_found">Harita uygulaması bulunamadı.</string>
+    <string name="error_invalid_city">Lütfen listeden geçerli bir şehir seç.</string>
+
+    <!-- p -->
+    <string name="pharmacy_unknown_name">İsimsiz Eczane</string>
+    <string name="pharmacy_unknown_district">İlçe yok</string>
+    <string name="pharmacy_unknown_address">Adres bilgisi bulunamadı.</string>
+    <string name="pharmacy_unknown_phone">Telefon bilgisi bulunamadı.</string>
+
+    <!-- s -->
+    <string name="state_idle_title">Henüz arama yapılmadı</string>
+    <string name="state_idle_message">Şehir girip nöbetçi eczaneleri görüntüleyebilirsin.</string>
+    <string name="state_loading_title">Eczaneler yükleniyor</string>
+    <string name="state_loading_message">Nöbetçi eczane bilgileri getiriliyor.</string>
+    <string name="state_empty_title">Eczane bulunamadı</string>
+    <string name="state_empty_message">%1$s için nöbetçi eczane bulunamadı.</string>
+    <string name="state_error_title">Bir sorun oluştu</string>
+    <string name="state_error_default_message">Eczane bilgileri alınamadı. Lütfen tekrar dene.</string>
+    <string name="status_found_pharmacies">%1$s için %2$d nöbetçi eczane bulundu.</string>
+</resources>
