@@ -6,6 +6,7 @@ import com.example.pharmacytrack.core.result.AppResult
 import com.example.pharmacytrack.data.model.PharmacyResponse
 import com.example.pharmacytrack.data.remote.PharmacyApiService
 import java.io.IOException
+import java.net.SocketTimeoutException
 import javax.inject.Inject
 
 class PharmacyRepository @Inject constructor(
@@ -38,6 +39,9 @@ class PharmacyRepository @Inject constructor(
                     )
                 )
             }
+        } catch (e: SocketTimeoutException) {
+            Logger.E(TAG, "Timeout while getting pharmacies. city=$city! R: " + e.message)
+            AppResult.Error(AppError.Timeout)
         } catch (e: IOException) {
             Logger.E(TAG, "Unknown error while getting pharmacies. city=$city! R: " + e.message)
             AppResult.Error(AppError.Network)

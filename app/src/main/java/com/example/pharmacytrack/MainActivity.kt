@@ -21,8 +21,7 @@ import android.content.Context
 import android.widget.ArrayAdapter
 import com.example.pharmacytrack.core.city.CityProvider
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
-import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
+import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.card.MaterialCardView
 
 import com.example.pharmacytrack.util.PharmacyActionHelper
@@ -44,11 +43,14 @@ class MainActivity : ComponentActivity() {
     private lateinit var statusTextView: TextView
     private lateinit var loadingProgressBar: ProgressBar
     private lateinit var pharmacyRecyclerView: RecyclerView
-    private lateinit var districtChipGroup: ChipGroup
+    private lateinit var districtInputLayout: TextInputLayout
+    private lateinit var districtAutoCompleteTextView: MaterialAutoCompleteTextView
     private lateinit var stateCardView: MaterialCardView
     private lateinit var stateTitleTextView: TextView
     private lateinit var stateMessageTextView: TextView
     private lateinit var retryButton: MaterialButton
+
+    private var isUpdatingDistrictDropdown = false
 
     @Inject
     lateinit var cityProvider: CityProvider
@@ -60,6 +62,7 @@ class MainActivity : ComponentActivity() {
 
         bindViews()
         setupCityDropdown()
+        setupDistrictDropdown()
         setupRecyclerView()
         setupClickListeners()
         observeUiState()
@@ -72,7 +75,8 @@ class MainActivity : ComponentActivity() {
         statusTextView = findViewById(R.id.statusTextView)
         loadingProgressBar = findViewById(R.id.loadingProgressBar)
         pharmacyRecyclerView = findViewById(R.id.pharmacyRecyclerView)
-        districtChipGroup = findViewById(R.id.districtChipGroup)
+        districtInputLayout = findViewById(R.id.districtInputLayout)
+        districtAutoCompleteTextView = findViewById(R.id.districtAutoCompleteTextView)
         stateCardView = findViewById(R.id.stateCardView)
         stateTitleTextView = findViewById(R.id.stateTitleTextView)
         stateMessageTextView = findViewById(R.id.stateMessageTextView)
@@ -111,6 +115,30 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun setupDistrictDropdown() {
+        districtAutoCompleteTextView.keyListener = null
+
+        districtAutoCompleteTextView.setOnClickListener {
+            districtAutoCompleteTextView.showDropDown()
+        }
+
+        districtAutoCompleteTextView.setOnItemClickListener { parent, _, position, _ ->
+            if (isUpdatingDistrictDropdown) {
+                return@setOnItemClickListener
+            }
+
+            val selectedText = parent.getItemAtPosition(position) as String
+
+            val selectedDistrict = if (selectedText == getString(R.string.district_filter_all)) {
+                null
+            } else {
+                selectedText
+            }
+
+            viewModel.selectDistrict(selectedDistrict)
+        }
+    }
+
     private fun setupRecyclerView() {
         pharmacyAdapter = PharmacyAdapter(
             onCallClicked = { pharmacy ->
@@ -131,6 +159,7 @@ class MainActivity : ComponentActivity() {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = pharmacyAdapter
             setHasFixedSize(false)
+            itemAnimator = null
         }
     }
 
@@ -197,7 +226,7 @@ class MainActivity : ComponentActivity() {
             }
 
             is PharmacyUiState.Error -> {
-                showError(state.message)
+                showError(state.message.asString(this))
             }
         }
     }
@@ -274,7 +303,6 @@ class MainActivity : ComponentActivity() {
         hideLoadingIndicator()
         hideRecyclerView()
         hideStatusText()
-        hideDistrictFilters()
         resetSearchButton()
         clearPharmacyList()
 
@@ -297,47 +325,6 @@ class MainActivity : ComponentActivity() {
     private fun hideStateCard() {
         stateCardView.visibility = View.GONE
         retryButton.visibility = View.GONE
-    }
-
-    private fun setupDistrictChips(state: PharmacyUiState.Success) {
-        districtChipGroup.setOnCheckedStateChangeListener(null)
-        districtChipGroup.removeAllViews()
-
-        val allChip = createDistrictChip(
-            text = "Tümü",
-            district = null,
-            checked = state.selectedDistrict == null
-        )
-
-        districtChipGroup.addView(allChip)
-
-        state.districtOptions.forEach { district ->
-            val chip = createDistrictChip(
-                text = district,
-                district = district,
-                checked = state.selectedDistrict == district
-            )
-
-            districtChipGroup.addView(chip)
-        }
-
-        districtChipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
-            val checkedId = checkedIds.firstOrNull() ?: return@setOnCheckedStateChangeListener
-            val checkedChip = group.findViewById<Chip>(checkedId)
-            val district = checkedChip.tag as? String
-
-            viewModel.selectDistrict(district)
-        }
-    }
-
-    private fun createDistrictChip(text: String, district: String?, checked: Boolean): Chip {
-        return Chip(this).apply {
-            id = View.generateViewId()
-            this.text = text
-            tag = district
-            isCheckable = true
-            isChecked = checked
-        }
     }
 
     private fun hideKeyboard() {
@@ -389,12 +376,12 @@ class MainActivity : ComponentActivity() {
 
     private fun resetSearchButton() {
         searchButton.isEnabled = true
-        searchButton.text = getString(R.string.button_search_pharmacies)
+        searchButton.text = getString(R.string.button_search_short)
     }
 
     private fun setSearchButtonLoading() {
         searchButton.isEnabled = false
-        searchButton.text = getString(R.string.button_loading)
+        searchButton.text = getString(R.string.button_loading_short)
     }
 
     private fun clearPharmacyList() {
@@ -402,8 +389,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun hideDistrictFilters() {
-        districtChipGroup.visibility = View.GONE
-        districtChipGroup.removeAllViews()
+        districtInputLayout.visibility = View.GONE
+        districtAutoCompleteTextView.setAdapter(null)
+        districtAutoCompleteTextView.setText("", false)
     }
 
     private fun showDistrictFilters(state: PharmacyUiState.Success) {
@@ -412,8 +400,26 @@ class MainActivity : ComponentActivity() {
             return
         }
 
-        districtChipGroup.visibility = View.VISIBLE
-        setupDistrictChips(state)
+        districtInputLayout.visibility = View.VISIBLE
+
+        val allDistrictsText = getString(R.string.district_filter_all)
+
+        val districtItems = listOf(allDistrictsText) + state.districtOptions
+
+        val adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_list_item_1,
+            districtItems
+        )
+
+        isUpdatingDistrictDropdown = true
+
+        districtAutoCompleteTextView.setAdapter(adapter)
+
+        val selectedText = state.selectedDistrict ?: allDistrictsText
+        districtAutoCompleteTextView.setText(selectedText, false)
+
+        isUpdatingDistrictDropdown = false
     }
 
     private fun showOnlyStateCard(title: String, message: String, showRetry: Boolean) {

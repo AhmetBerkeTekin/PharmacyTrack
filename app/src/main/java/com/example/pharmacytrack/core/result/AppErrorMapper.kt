@@ -1,25 +1,37 @@
 package com.example.pharmacytrack.core.result
 
-fun AppError.toUserMessage(): String {
+import com.example.pharmacytrack.R
+import com.example.pharmacytrack.core.ui.UiText
+
+fun AppError.toUiText(): UiText {
     return when (this) {
         AppError.Network -> {
-            "Sunucuya ulaşılamadı. İnternet bağlantını veya servis adresini kontrol et."
+            UiText.StringResource(R.string.error_network)
+        }
+
+        AppError.Timeout -> {
+            UiText.StringResource(R.string.error_timeout)
         }
 
         AppError.EmptyResponse -> {
-            "Sunucu boş cevap döndürdü. Lütfen tekrar dene."
+            UiText.StringResource(R.string.error_empty_response)
         }
 
         is AppError.Http -> {
             when (code) {
-                404 -> "Bu şehir için eczane bilgisi bulunamadı."
-                in 500..599 -> "Sunucuda geçici bir sorun var. Lütfen tekrar dene."
-                else -> "İstek tamamlanamadı. Hata kodu: $code"
+                404 -> UiText.StringResource(R.string.error_city_not_found)
+
+                in 500..599 -> UiText.StringResource(R.string.error_server)
+
+                else -> UiText.StringResource(
+                    resId = R.string.error_request_failed,
+                    args = listOf(code)
+                )
             }
         }
 
         is AppError.Unknown -> {
-            "Beklenmeyen bir hata oluştu. Lütfen tekrar dene."
+            UiText.StringResource(R.string.error_unknown)
         }
     }
 }

@@ -2,8 +2,10 @@ package com.example.pharmacytrack.ui.pharmacy
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.pharmacytrack.R
 import com.example.pharmacytrack.core.result.AppResult
-import com.example.pharmacytrack.core.result.toUserMessage
+import com.example.pharmacytrack.core.result.toUiText
+import com.example.pharmacytrack.core.ui.UiText
 import com.example.pharmacytrack.data.local.UserPreferences
 import com.example.pharmacytrack.data.model.Pharmacy
 import com.example.pharmacytrack.data.repository.PharmacyRepository
@@ -13,6 +15,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+import com.example.pharmacytrack.data.mapper.resolveCityName
+import com.example.pharmacytrack.data.mapper.resolveSource
+import com.example.pharmacytrack.data.mapper.toSafePharmacyList
 
 @HiltViewModel
 class PharmacyViewModel @Inject constructor(
@@ -33,7 +39,9 @@ class PharmacyViewModel @Inject constructor(
         val normalizedCity = city.trim()
 
         if (normalizedCity.isBlank()) {
-            _uiState.value = PharmacyUiState.Error("Şehir boş olamaz.")
+            _uiState.value = PharmacyUiState.Error(
+                UiText.StringResource(R.string.error_invalid_city)
+            )
             return
         }
 
@@ -46,24 +54,13 @@ class PharmacyViewModel @Inject constructor(
                 is AppResult.Success -> {
                     val response = result.data
 
-                    currentCity = response.city
-                        .orEmpty()
-                        .ifBlank { normalizedCity }
-                        .let { formatCityName(it) }
+                    currentCity = response.resolveCityName(
+                        fallbackCity = normalizedCity
+                    )
 
-                    currentSource = response.source.orEmpty()
+                    currentSource = response.resolveSource()
 
-                    allPharmacies = response.pharmacies
-                        .orEmpty()
-                        .filterNotNull()
-                        .map { pharmacy ->
-                            Pharmacy(
-                                district = pharmacy.district.orEmpty(),
-                                name = pharmacy.name.orEmpty(),
-                                address = pharmacy.address.orEmpty(),
-                                phone = pharmacy.phone.orEmpty()
-                            )
-                        }
+                    allPharmacies = response.toSafePharmacyList()
 
                     val rememberedDistrict = userPreferences.getLastDistrictForCity(currentCity)
                     val districtOptions = getDistrictOptions(allPharmacies)
@@ -83,7 +80,7 @@ class PharmacyViewModel @Inject constructor(
 
                 is AppResult.Error -> {
                     _uiState.value = PharmacyUiState.Error(
-                        message = result.error.toUserMessage()
+                        message = result.error.toUiText()
                     )
                 }
             }
@@ -128,11 +125,5 @@ class PharmacyViewModel @Inject constructor(
             districtOptions = districtOptions,
             selectedDistrict = selectedDistrict
         )
-    }
-
-    private fun formatCityName(city: String): String {
-        return city.trim()
-            .lowercase()
-            .replaceFirstChar { it.uppercase() }
     }
 }

@@ -3,7 +3,7 @@ package com.example.pharmacytrack.core.result
 sealed class AppError {
 
     data object Network : AppError()
-
+    data object Timeout : AppError()
     data object EmptyResponse : AppError()
 
     data class Http(

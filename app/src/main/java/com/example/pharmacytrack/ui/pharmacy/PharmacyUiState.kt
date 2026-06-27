@@ -1,5 +1,6 @@
 package com.example.pharmacytrack.ui.pharmacy
 
+import com.example.pharmacytrack.core.ui.UiText
 import com.example.pharmacytrack.data.model.Pharmacy
 
 sealed interface PharmacyUiState {
@@ -15,6 +16,6 @@ sealed interface PharmacyUiState {
     ) : PharmacyUiState
 
     data class Error(
-        val message: String
+        val message: UiText
     ) : PharmacyUiState
 }

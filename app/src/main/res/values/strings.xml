@@ -5,12 +5,18 @@
     <string name="app_subtitle">Şehir seç, en yakın nöbetçi eczaneleri görüntüle.</string>
 
     <!-- b -->
-    <string name="button_search_pharmacies">Eczaneleri Getir</string>
     <string name="button_loading">Yükleniyor...</string>
+    <string name="button_loading_short">...</string>
     <string name="button_retry">Tekrar Dene</string>
+    <string name="button_search_pharmacies">Eczaneleri Getir</string>
+    <string name="button_search_short">Ara</string>
 
     <!-- c -->
     <string name="city">Şehir</string>
+
+    <!-- d -->
+    <string name="district_filter_hint">İlçe</string>
+    <string name="district_filter_all">Tüm ilçeler</string>
 
     <!-- e -->
     <string name="error_phone_not_found">Telefon numarası bulunamadı.</string>
@@ -18,6 +24,13 @@
     <string name="error_address_not_found">Adres bilgisi bulunamadı.</string>
     <string name="error_map_app_not_found">Harita uygulaması bulunamadı.</string>
     <string name="error_invalid_city">Lütfen listeden geçerli bir şehir seç.</string>
+    <string name="error_network">Sunucuya ulaşılamadı. İnternet bağlantını veya servis adresini kontrol et.</string>
+    <string name="error_timeout">Sunucudan cevap alınamadı. Lütfen biraz sonra tekrar dene.</string>
+    <string name="error_empty_response">Sunucu boş cevap döndürdü. Lütfen tekrar dene.</string>
+    <string name="error_city_not_found">Bu şehir için eczane bilgisi bulunamadı.</string>
+    <string name="error_server">Sunucuda geçici bir sorun var. Lütfen tekrar dene.</string>
+    <string name="error_request_failed">İstek tamamlanamadı. Hata kodu: %1$d</string>
+    <string name="error_unknown">Beklenmeyen bir hata oluştu. Lütfen tekrar dene.</string>
 
     <!-- p -->
     <string name="pharmacy_unknown_name">İsimsiz Eczane</string>
