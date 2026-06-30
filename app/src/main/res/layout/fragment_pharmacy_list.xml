@@ -30,17 +30,18 @@
         android:id="@+id/searchRowLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="22dp"
+        android:layout_marginTop="18dp"
+        android:baselineAligned="false"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/cityInputLayout"
             android:layout_width="0dp"
-            android:layout_height="56dp"
+            android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
             android:layout_weight="1"
-            android:hint="Şehir"
+            android:hint="@string/city_filter_hint"
             app:boxBackgroundMode="outline"
             app:boxCornerRadiusBottomEnd="14dp"
             app:boxCornerRadiusBottomStart="14dp"
@@ -51,26 +52,28 @@
             <com.google.android.material.textfield.MaterialAutoCompleteTextView
                 android:id="@+id/cityEditText"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="52dp"
                 android:completionThreshold="1"
                 android:gravity="center_vertical"
                 android:inputType="textCapWords"
+                android:paddingTop="0dp"
+                android:paddingBottom="0dp"
                 android:singleLine="true" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/searchButton"
-            android:layout_width="76dp"
-            android:layout_height="52dp"
-            android:minHeight="0dp"
+            android:layout_width="72dp"
+            android:layout_height="48dp"
             android:minWidth="0dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
+            android:minHeight="0dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
             android:text="@string/button_search_short"
             android:textAllCaps="false"
             android:textStyle="bold"
-            app:cornerRadius="14dp" />
+            app:cornerRadius="13dp" />
 
     </LinearLayout>
 
@@ -87,7 +90,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="18dp"
-        android:text="Şehir girip arama yapabilirsin."
+        tools:text="@string/state_idle_message"
         android:textColor="@color/pharmacy_text_secondary"
         android:textSize="14sp" />
 

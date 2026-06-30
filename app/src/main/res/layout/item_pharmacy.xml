@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/pharmacyCardView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -27,24 +28,25 @@
                 android:id="@+id/pharmacyNameTextView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="12dp"
+                android:layout_marginEnd="10dp"
                 android:layout_weight="1"
-                android:text="Keklik Eczanesi"
                 android:textColor="@color/pharmacy_text_primary"
                 android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:text="Keklik Eczanesi" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/districtChip"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
                 android:clickable="false"
                 android:focusable="false"
-                android:text="Aladağ"
                 android:textColor="@color/pharmacy_primary"
                 android:textSize="12sp"
                 app:chipBackgroundColor="#E8F5EF"
-                app:chipMinHeight="30dp" />
+                app:chipMinHeight="30dp"
+                tools:text="Aladağ" />
 
             <ImageButton
                 android:id="@+id/favoriteButton"
@@ -80,7 +82,7 @@
                 android:layout_weight="1"
                 android:ellipsize="end"
                 android:maxLines="3"
-                android:text="Mansurlu Mahallesi, İnönü Caddesi, No:105 Aladağ / Adana"
+                tools:text="Mansurlu Mahallesi, İnönü Caddesi, No:105 Aladağ / Adana"
                 android:textColor="@color/pharmacy_text_secondary"
                 android:textSize="14sp" />
 
@@ -106,7 +108,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:layout_weight="1"
-                android:text="0 (322) 591-24-24"
+                tools:text="0 (322) 591-24-24"
                 android:textColor="@color/pharmacy_text_primary"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -128,7 +130,7 @@
                 android:layout_height="46dp"
                 android:layout_marginEnd="8dp"
                 android:layout_weight="1"
-                android:text="Ara"
+                android:text="@string/button_search_short"
                 android:textAllCaps="false"
                 android:textStyle="bold"
                 app:cornerRadius="14dp"
@@ -141,7 +143,7 @@
                 android:layout_width="0dp"
                 android:layout_height="46dp"
                 android:layout_weight="1"
-                android:text="Haritada Aç"
+                tools:text="Haritada Aç"
                 android:textAllCaps="false"
                 android:textStyle="bold"
                 app:cornerRadius="14dp"

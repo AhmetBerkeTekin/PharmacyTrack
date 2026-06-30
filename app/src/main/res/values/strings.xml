@@ -1,12 +1,12 @@
 <resources>
     <!-- a -->
     <string name="app_name">PharmacyTrack</string>
-    <string name="app_title">Nöbetçi Eczaneler</string>
     <string name="app_subtitle">Şehir seç, en yakın nöbetçi eczaneleri görüntüle.</string>
+    <string name="app_title">Nöbetçi Eczaneler</string>
 
     <!-- b -->
-    <string name="bottom_nav_pharmacies">Eczaneler</string>
     <string name="bottom_nav_favorites">Favoriler</string>
+    <string name="bottom_nav_pharmacies">Eczaneler</string>
     <string name="button_loading">Yükleniyor...</string>
     <string name="button_loading_short">...</string>
     <string name="button_retry">Tekrar Dene</string>
@@ -14,52 +14,54 @@
     <string name="button_search_short">Ara</string>
 
     <!-- c -->
-    <string name="city">Şehir</string>
+    <string name="city_filter_hint">Şehir</string>
 
     <!-- d -->
-    <string name="district_filter_hint">İlçe</string>
     <string name="district_filter_all">Tüm ilçeler</string>
+    <string name="district_filter_hint">İlçe</string>
 
     <!-- e -->
-    <string name="error_phone_not_found">Telefon numarası bulunamadı.</string>
-    <string name="error_phone_app_not_found">Telefon uygulaması bulunamadı.</string>
     <string name="error_address_not_found">Adres bilgisi bulunamadı.</string>
-    <string name="error_map_app_not_found">Harita uygulaması bulunamadı.</string>
-    <string name="error_invalid_city">Lütfen listeden geçerli bir şehir seç.</string>
-    <string name="error_network">Sunucuya ulaşılamadı. İnternet bağlantını veya servis adresini kontrol et.</string>
-    <string name="error_timeout">Sunucudan cevap alınamadı. Lütfen biraz sonra tekrar dene.</string>
-    <string name="error_empty_response">Sunucu boş cevap döndürdü. Lütfen tekrar dene.</string>
     <string name="error_city_not_found">Bu şehir için eczane bilgisi bulunamadı.</string>
-    <string name="error_server">Sunucuda geçici bir sorun var. Lütfen tekrar dene.</string>
+    <string name="error_empty_response">Sunucu boş cevap döndürdü. Lütfen tekrar dene.</string>
+    <string name="error_invalid_city">Lütfen listeden geçerli bir şehir seç.</string>
+    <string name="error_map_app_not_found">Harita uygulaması bulunamadı.</string>
+    <string name="error_network">Sunucuya ulaşılamadı. İnternet bağlantını veya servis adresini kontrol et.</string>
+    <string name="error_phone_app_not_found">Telefon uygulaması bulunamadı.</string>
+    <string name="error_phone_not_found">Telefon numarası bulunamadı.</string>
     <string name="error_request_failed">İstek tamamlanamadı. Hata kodu: %1$d</string>
+    <string name="error_server">Sunucuda geçici bir sorun var. Lütfen tekrar dene.</string>
+    <string name="error_timeout">Sunucudan cevap alınamadı. Lütfen biraz sonra tekrar dene.</string>
     <string name="error_unknown">Beklenmeyen bir hata oluştu. Lütfen tekrar dene.</string>
 
     <!-- f -->
-    <string name="favorites_title">Favori Eczaneler</string>
-    <string name="favorites_subtitle">Kaydettiğin eczanelere hızlıca ulaşabilirsin.</string>
-    <string name="favorites_empty_title">Henüz favori eczane yok</string>
-    <string name="favorites_empty_message">Eczaneler sekmesinden yıldız simgesine dokunarak favori ekleyebilirsin.</string>
     <string name="favorite_add">Favorilere ekle</string>
     <string name="favorite_remove">Favorilerden çıkar</string>
+    <string name="favorites_empty_message">Eczaneler sekmesinden yıldız simgesine dokunarak favori ekleyebilirsin.</string>
+    <string name="favorites_empty_title">Henüz favori eczane yok</string>
+    <string name="favorites_subtitle">Kaydettiğin eczanelere hızlıca ulaşabilirsin.</string>
+    <string name="favorites_title">Favori Eczaneler</string>
 
     <!-- n -->
-    <string name="nav_label_pharmacies">Nöbetçi Eczaneler</string>
     <string name="nav_label_favorites">Favoriler</string>
+    <string name="nav_label_pharmacies">Nöbetçi Eczaneler</string>
 
     <!-- p -->
-    <string name="pharmacy_unknown_name">İsimsiz Eczane</string>
-    <string name="pharmacy_unknown_district">İlçe yok</string>
+    <string name="pharmacy_card_sample_district">İlçe</string>
+    <string name="pharmacy_card_sample_name">Eczane adı</string>
     <string name="pharmacy_unknown_address">Adres bilgisi bulunamadı.</string>
+    <string name="pharmacy_unknown_district">İlçe yok</string>
+    <string name="pharmacy_unknown_name">İsimsiz Eczane</string>
     <string name="pharmacy_unknown_phone">Telefon bilgisi bulunamadı.</string>
 
     <!-- s -->
-    <string name="state_idle_title">Henüz arama yapılmadı</string>
-    <string name="state_idle_message">Şehir girip nöbetçi eczaneleri görüntüleyebilirsin.</string>
-    <string name="state_loading_title">Eczaneler yükleniyor</string>
-    <string name="state_loading_message">Nöbetçi eczane bilgileri getiriliyor.</string>
-    <string name="state_empty_title">Eczane bulunamadı</string>
     <string name="state_empty_message">%1$s için nöbetçi eczane bulunamadı.</string>
-    <string name="state_error_title">Bir sorun oluştu</string>
+    <string name="state_empty_title">Eczane bulunamadı</string>
     <string name="state_error_default_message">Eczane bilgileri alınamadı. Lütfen tekrar dene.</string>
+    <string name="state_error_title">Bir sorun oluştu</string>
+    <string name="state_idle_message">Şehir girip nöbetçi eczaneleri görüntüleyebilirsin.</string>
+    <string name="state_idle_title">Henüz arama yapılmadı</string>
+    <string name="state_loading_message">Nöbetçi eczane bilgileri getiriliyor.</string>
+    <string name="state_loading_title">Eczaneler yükleniyor</string>
     <string name="status_found_pharmacies">%1$s için %2$d nöbetçi eczane bulundu.</string>
 </resources>
