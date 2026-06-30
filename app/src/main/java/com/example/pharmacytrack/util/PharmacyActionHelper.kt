@@ -6,7 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import com.example.pharmacytrack.R
-import com.example.pharmacytrack.data.model.Pharmacy
 import androidx.core.net.toUri
 import com.example.pharmacytrack.core.logger.Logger
 
@@ -14,10 +13,7 @@ object PharmacyActionHelper {
 
     private const val TAG = "PharmacyActionHelper"
 
-    fun openDialer(
-        context: Context,
-        phone: String?
-    ) {
+    fun openDialer(context: Context, phone: String?) {
         val cleanPhone = phone
             .orEmpty()
             .trim()
@@ -39,53 +35,53 @@ object PharmacyActionHelper {
         }
     }
 
-    fun openMap(
-        context: Context,
-        pharmacy: Pharmacy
-    ) {
-        val query = buildString {
-            append(pharmacy.name.orEmpty())
-
-            if (pharmacy.address.orEmpty().isNotBlank()) {
-                append(", ")
-                append(pharmacy.address.orEmpty())
-            }
-        }.trim()
+    fun openMap(context: Context, name: String?, address: String?) {
+        val query = listOfNotNull(
+            name?.takeIf { it.isNotBlank() },
+        address?.takeIf { it.isNotBlank() }
+        ).joinToString(" ")
 
         if (query.isBlank()) {
-            showToast(context, R.string.error_address_not_found)
+            Toast.makeText(
+                context,
+                context.getString(R.string.error_address_not_found),
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
 
-        val geoIntent = Intent(Intent.ACTION_VIEW).apply {
-            data = "geo:0,0?q=${Uri.encode(query)}".toUri()
-        }
+        val encodedQuery = Uri.encode(query)
 
-        val webIntent = Intent(Intent.ACTION_VIEW).apply {
-            data = "https://www.google.com/maps/search/?api=1&query=${Uri.encode(query)}".toUri()
-        }
+        val mapIntent = Intent(
+            Intent.ACTION_VIEW,
+            "geo:0,0?q=$encodedQuery".toUri()
+        )
 
         try {
-            context.startActivity(geoIntent)
+            context.startActivity(mapIntent)
         } catch (e: ActivityNotFoundException) {
-            Logger.W(TAG, "Geo map app not found! R: " + e.message)
+            Logger.E(TAG, "Map app not found! " + e.message)
+
+            val webIntent = Intent(
+                Intent.ACTION_VIEW,
+                "https://www.google.com/maps/search/?api=1&query=$encodedQuery".toUri()
+            )
+
             try {
                 context.startActivity(webIntent)
-            } catch (e: ActivityNotFoundException) {
-                Logger.E(TAG, "Map fallback also failed! R: " + e.message)
-                showToast(context, R.string.error_map_app_not_found)
+            } catch (webException: ActivityNotFoundException) {
+                Logger.E(TAG, "Browser app not found for map fallback! " + webException.message)
+
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.error_map_app_not_found),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
 
-    private fun showToast(
-        context: Context,
-        messageResId: Int
-    ) {
-        Toast.makeText(
-            context,
-            context.getString(messageResId),
-            Toast.LENGTH_SHORT
-        ).show()
+    private fun showToast(context: Context, messageResId: Int) {
+        Toast.makeText(context, context.getString(messageResId), Toast.LENGTH_SHORT).show()
     }
 }

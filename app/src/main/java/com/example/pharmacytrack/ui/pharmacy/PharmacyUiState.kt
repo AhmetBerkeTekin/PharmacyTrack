@@ -10,7 +10,7 @@ sealed interface PharmacyUiState {
     data class Success(
         val city: String,
         val source: String,
-        val pharmacies: List<Pharmacy>,
+        val pharmacies: List<PharmacyUiModel>,
         val districtOptions: List<String>,
         val selectedDistrict: String?
     ) : PharmacyUiState

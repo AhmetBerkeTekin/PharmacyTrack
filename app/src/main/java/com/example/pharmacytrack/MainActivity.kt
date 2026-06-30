@@ -51,6 +51,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var retryButton: MaterialButton
 
     private var isUpdatingDistrictDropdown = false
+    private var shouldScroll = false // Consider using a scroll event instead
 
     @Inject
     lateinit var cityProvider: CityProvider
@@ -135,6 +136,7 @@ class MainActivity : ComponentActivity() {
                 selectedText
             }
 
+            shouldScroll = true
             viewModel.selectDistrict(selectedDistrict)
         }
     }
@@ -150,8 +152,12 @@ class MainActivity : ComponentActivity() {
             onMapClicked = { pharmacy ->
                 PharmacyActionHelper.openMap(
                     context = this,
-                    pharmacy = pharmacy
+                    name = pharmacy.name,
+                    address = pharmacy.address
                 )
+            },
+            onFavoriteClicked = { pharmacy ->
+                viewModel.toggleFavorite(pharmacy)
             }
         )
 
@@ -186,6 +192,7 @@ class MainActivity : ComponentActivity() {
         hideKeyboard()
         cityEditText.clearFocus()
 
+        shouldScroll = true
         viewModel.getPharmacies(matchedCity)
     }
 
@@ -272,6 +279,7 @@ class MainActivity : ComponentActivity() {
         )
 
         if (state.pharmacies.isEmpty()) {
+            shouldScroll = false
             clearPharmacyList()
 
             showOnlyStateCard(
@@ -295,7 +303,10 @@ class MainActivity : ComponentActivity() {
         )
 
         pharmacyAdapter.submitList(state.pharmacies) {
-            pharmacyRecyclerView.scrollToPosition(0)
+            if (shouldScroll) {
+                pharmacyRecyclerView.scrollToPosition(0)
+                shouldScroll = false
+            }
         }
     }
 

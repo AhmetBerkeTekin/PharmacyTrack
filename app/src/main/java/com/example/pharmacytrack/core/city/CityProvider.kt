@@ -2,6 +2,7 @@ package com.example.pharmacytrack.core.city
 
 import android.content.Context
 import com.example.pharmacytrack.R
+import com.example.pharmacytrack.core.text.toTurkishSearchKey
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,14 +19,14 @@ class CityProvider @Inject constructor(
     }
 
     fun findValidCity(input: String): String? {
-        val normalizedInput = input.trim()
+        val inputKey = input.toTurkishSearchKey()
 
-        if (normalizedInput.isBlank()) {
+        if (inputKey.isBlank()) {
             return null
         }
 
         return cities.firstOrNull { city ->
-            city.equals(normalizedInput, ignoreCase = true)
+            city.toTurkishSearchKey() == inputKey
         }
     }
 }

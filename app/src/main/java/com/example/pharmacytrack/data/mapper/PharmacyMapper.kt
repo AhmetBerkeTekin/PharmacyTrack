@@ -13,10 +13,9 @@ fun PharmacyResponse.toSafePharmacyList(): List<Pharmacy> {
 }
 
 fun PharmacyResponse.resolveCityName(fallbackCity: String): String {
-    return city
-        .orEmpty()
-        .ifBlank { fallbackCity }
-        .toDisplayCityName()
+    return fallbackCity.ifBlank {
+        city.orEmpty()
+    }
 }
 
 fun PharmacyResponse.resolveSource(): String {

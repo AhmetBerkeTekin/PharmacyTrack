@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.pharmacytrack.R
 import com.example.pharmacytrack.core.result.AppResult
 import com.example.pharmacytrack.core.result.toUiText
+import com.example.pharmacytrack.core.text.toApiCitySlug
 import com.example.pharmacytrack.core.ui.UiText
+import com.example.pharmacytrack.data.local.FavoriteStore
 import com.example.pharmacytrack.data.local.UserPreferences
 import com.example.pharmacytrack.data.model.Pharmacy
 import com.example.pharmacytrack.data.repository.PharmacyRepository
@@ -23,7 +25,8 @@ import com.example.pharmacytrack.data.mapper.toSafePharmacyList
 @HiltViewModel
 class PharmacyViewModel @Inject constructor(
     private val repository: PharmacyRepository,
-    private val userPreferences: UserPreferences
+    private val userPreferences: UserPreferences,
+    private val favoriteStore: FavoriteStore
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<PharmacyUiState>(PharmacyUiState.Idle)
@@ -34,6 +37,23 @@ class PharmacyViewModel @Inject constructor(
     private var allPharmacies: List<Pharmacy> = emptyList()
     private var selectedDistrict: String? = null
     val lastCityFlow = userPreferences.lastCityFlow
+    private var favoriteKeys: Set<String> = emptySet()
+
+    init {
+        observeFavoriteKeys()
+    }
+
+    private fun observeFavoriteKeys() {
+        viewModelScope.launch {
+            favoriteStore.favoriteKeysFlow.collect { keys ->
+                favoriteKeys = keys
+
+                if (allPharmacies.isNotEmpty()) {
+                    emitSuccessState()
+                }
+            }
+        }
+    }
 
     fun getPharmacies(city: String) {
         val normalizedCity = city.trim()
@@ -48,7 +68,8 @@ class PharmacyViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = PharmacyUiState.Loading
 
-            val result = repository.getPharmacies(normalizedCity)
+            val apiCitySlug = normalizedCity.toApiCitySlug()
+            val result = repository.getPharmacies(apiCitySlug)
 
             when (result) {
                 is AppResult.Success -> {
@@ -121,9 +142,17 @@ class PharmacyViewModel @Inject constructor(
         _uiState.value = PharmacyUiState.Success(
             city = currentCity,
             source = currentSource,
-            pharmacies = filteredPharmacies,
+            pharmacies = filteredPharmacies.toUiModels(
+                favoriteKeys = favoriteKeys
+            ),
             districtOptions = districtOptions,
             selectedDistrict = selectedDistrict
         )
+    }
+
+    fun toggleFavorite(pharmacy: PharmacyUiModel) {
+        viewModelScope.launch {
+            favoriteStore.toggleFavorite(pharmacy.favoriteKey)
+        }
     }
 }

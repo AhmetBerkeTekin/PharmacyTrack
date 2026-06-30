@@ -32,6 +32,10 @@
     <string name="error_request_failed">İstek tamamlanamadı. Hata kodu: %1$d</string>
     <string name="error_unknown">Beklenmeyen bir hata oluştu. Lütfen tekrar dene.</string>
 
+    <!-- f -->
+    <string name="favorite_add">Favorilere ekle</string>
+    <string name="favorite_remove">Favorilerden çıkar</string>
+
     <!-- p -->
     <string name="pharmacy_unknown_name">İsimsiz Eczane</string>
     <string name="pharmacy_unknown_district">İlçe yok</string>

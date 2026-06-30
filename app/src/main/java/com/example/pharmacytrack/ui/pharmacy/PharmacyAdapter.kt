@@ -1,90 +1,132 @@
 package com.example.pharmacytrack.ui.pharmacy
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.pharmacytrack.R
-import com.example.pharmacytrack.data.model.Pharmacy
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 
 class PharmacyAdapter(
-    private val onCallClicked: (Pharmacy) -> Unit,
-    private val onMapClicked: (Pharmacy) -> Unit
-) : ListAdapter<Pharmacy, PharmacyAdapter.PharmacyViewHolder>(PharmacyDiffCallback()) {
+    private val onCallClicked: (PharmacyUiModel) -> Unit,
+    private val onMapClicked: (PharmacyUiModel) -> Unit,
+    private val onFavoriteClicked: (PharmacyUiModel) -> Unit
+) : ListAdapter<PharmacyUiModel, PharmacyAdapter.PharmacyViewHolder>(
+    PharmacyDiffCallback()
+) {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PharmacyViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_pharmacy, parent, false)
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): PharmacyViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_pharmacy, parent, false)
 
-        return PharmacyViewHolder(parent = this, itemView = view)
+        return PharmacyViewHolder(
+            itemView = view,
+            onCallClicked = onCallClicked,
+            onMapClicked = onMapClicked,
+            onFavoriteClicked = onFavoriteClicked
+        )
     }
 
-    override fun onBindViewHolder(holder: PharmacyViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: PharmacyViewHolder,
+        position: Int
+    ) {
         holder.bind(getItem(position))
     }
 
     class PharmacyViewHolder(
-        private val parent: PharmacyAdapter,
-        itemView: android.view.View
+        itemView: View,
+        private val onCallClicked: (PharmacyUiModel) -> Unit,
+        private val onMapClicked: (PharmacyUiModel) -> Unit,
+        private val onFavoriteClicked: (PharmacyUiModel) -> Unit
     ) : RecyclerView.ViewHolder(itemView) {
 
-        private val pharmacyNameTextView: TextView = itemView.findViewById(R.id.pharmacyNameTextView)
-        private val districtChip: Chip = itemView.findViewById(R.id.districtChip)
-        private val addressTextView: TextView = itemView.findViewById(R.id.addressTextView)
-        private val phoneTextView: TextView = itemView.findViewById(R.id.phoneTextView)
-        private val callButton: MaterialButton = itemView.findViewById(R.id.callButton)
-        private val mapButton: MaterialButton = itemView.findViewById(R.id.mapButton)
+        private val pharmacyNameTextView: TextView =
+            itemView.findViewById(R.id.pharmacyNameTextView)
 
-        fun bind(pharmacy: Pharmacy) {
+        private val districtChip: Chip =
+            itemView.findViewById(R.id.districtChip)
+
+        private val favoriteButton: ImageButton =
+            itemView.findViewById(R.id.favoriteButton)
+
+        private val addressTextView: TextView =
+            itemView.findViewById(R.id.addressTextView)
+
+        private val phoneTextView: TextView =
+            itemView.findViewById(R.id.phoneTextView)
+
+        private val callButton: MaterialButton =
+            itemView.findViewById(R.id.callButton)
+
+        private val mapButton: MaterialButton =
+            itemView.findViewById(R.id.mapButton)
+
+        fun bind(pharmacy: PharmacyUiModel) {
             val context = itemView.context
 
-            val name = pharmacy.name.orEmpty()
-            val district = pharmacy.district.orEmpty()
-            val address = pharmacy.address.orEmpty()
-            val phone = pharmacy.phone.orEmpty()
-
-            pharmacyNameTextView.text = name.ifBlank {
+            pharmacyNameTextView.text = pharmacy.name.ifBlank {
                 context.getString(R.string.pharmacy_unknown_name)
             }
 
-            districtChip.text = district.ifBlank {
+            districtChip.text = pharmacy.district.ifBlank {
                 context.getString(R.string.pharmacy_unknown_district)
             }
 
-            addressTextView.text = address.ifBlank {
+            addressTextView.text = pharmacy.address.ifBlank {
                 context.getString(R.string.pharmacy_unknown_address)
             }
 
-            phoneTextView.text = phone.ifBlank {
+            phoneTextView.text = pharmacy.phone.ifBlank {
                 context.getString(R.string.pharmacy_unknown_phone)
             }
 
-            callButton.isEnabled = phone.isNotBlank()
-            mapButton.isEnabled = address.isNotBlank()
+            favoriteButton.setImageResource(
+                if (pharmacy.isFavorite) {
+                    R.drawable.ic_star_filled_24
+                } else {
+                    R.drawable.ic_star_border_24
+                }
+            )
+
+            favoriteButton.contentDescription = context.getString(
+                if (pharmacy.isFavorite) {
+                    R.string.favorite_remove
+                } else {
+                    R.string.favorite_add
+                }
+            )
+
+            favoriteButton.setOnClickListener {
+                onFavoriteClicked(pharmacy)
+            }
 
             callButton.setOnClickListener {
-                parent.onCallClicked(pharmacy)
+                onCallClicked(pharmacy)
             }
 
             mapButton.setOnClickListener {
-                parent.onMapClicked(pharmacy)
+                onMapClicked(pharmacy)
             }
         }
     }
+}
 
-    private class PharmacyDiffCallback : DiffUtil.ItemCallback<Pharmacy>() {
+private class PharmacyDiffCallback : DiffUtil.ItemCallback<PharmacyUiModel>() {
 
-        override fun areItemsTheSame(oldItem: Pharmacy, newItem: Pharmacy): Boolean {
+    override fun areItemsTheSame(oldItem: PharmacyUiModel, newItem: PharmacyUiModel): Boolean {
+        return oldItem.favoriteKey == newItem.favoriteKey
+    }
 
-            return oldItem.name.orEmpty() == newItem.name.orEmpty() && oldItem.address.orEmpty() == newItem.address.orEmpty()
-        }
-
-        override fun areContentsTheSame(oldItem: Pharmacy, newItem: Pharmacy): Boolean {
-
-            return oldItem == newItem
-        }
+    override fun areContentsTheSame(oldItem: PharmacyUiModel, newItem: PharmacyUiModel): Boolean {
+        return oldItem == newItem
     }
 }
