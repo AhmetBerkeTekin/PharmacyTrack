@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/pharmacyListFragment"
+        android:icon="@drawable/ic_location_24"
+        android:title="Eczaneler" />
+
+    <item
+        android:id="@+id/favoritesFragment"
+        android:icon="@drawable/ic_star_filled_24"
+        android:title="Favoriler" />
+
+</menu>

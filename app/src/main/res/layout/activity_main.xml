@@ -1,178 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/mainLayout"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+android:layout_width="match_parent"
+android:layout_height="match_parent">
+
+<androidx.fragment.app.FragmentContainerView
+    android:id="@+id/navHostFragment"
+    android:name="androidx.navigation.fragment.NavHostFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/pharmacy_background"
-    android:orientation="vertical"
-    android:padding="20dp">
+    android:layout_marginBottom="72dp"
+    app:defaultNavHost="true"
+    app:navGraph="@navigation/nav_graph" />
 
-    <TextView
-        android:id="@+id/titleTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/app_title"
-        android:textColor="@color/pharmacy_text_primary"
-        android:textSize="26sp"
-        android:textStyle="bold" />
+<com.google.android.material.bottomnavigation.BottomNavigationView
+    android:id="@+id/bottomNavigationView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    app:menu="@menu/bottom_nav_menu" />
 
-    <TextView
-        android:id="@+id/subtitleTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="@string/app_subtitle"
-        android:textColor="@color/pharmacy_text_secondary"
-        android:textSize="14sp" />
-
-    <LinearLayout
-        android:id="@+id/searchRowLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="22dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/cityInputLayout"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_marginEnd="10dp"
-            android:layout_weight="1"
-            android:hint="Şehir"
-            app:boxBackgroundMode="outline"
-            app:boxCornerRadiusBottomEnd="14dp"
-            app:boxCornerRadiusBottomStart="14dp"
-            app:boxCornerRadiusTopEnd="14dp"
-            app:boxCornerRadiusTopStart="14dp"
-            app:endIconMode="dropdown_menu">
-
-            <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                android:id="@+id/cityEditText"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:completionThreshold="1"
-                android:gravity="center_vertical"
-                android:inputType="textCapWords"
-                android:singleLine="true" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/searchButton"
-            android:layout_width="76dp"
-            android:layout_height="52dp"
-            android:minHeight="0dp"
-            android:minWidth="0dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:text="@string/button_search_short"
-            android:textAllCaps="false"
-            android:textStyle="bold"
-            app:cornerRadius="14dp" />
-
-    </LinearLayout>
-
-    <ProgressBar
-        android:id="@+id/loadingProgressBar"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="24dp"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/statusTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="18dp"
-        android:text="Şehir girip arama yapabilirsin."
-        android:textColor="@color/pharmacy_text_secondary"
-        android:textSize="14sp" />
-
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/stateCardView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="18dp"
-        android:visibility="gone"
-        app:cardBackgroundColor="@color/pharmacy_surface"
-        app:cardCornerRadius="18dp"
-        app:cardElevation="0dp"
-        app:strokeColor="@color/pharmacy_border"
-        app:strokeWidth="1dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="18dp">
-
-            <TextView
-                android:id="@+id/stateTitleTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/state_idle_title"
-                android:textColor="@color/pharmacy_text_primary"
-                android:textSize="17sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/stateMessageTextView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="@string/state_idle_message"
-                android:textColor="@color/pharmacy_text_secondary"
-                android:textSize="14sp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/retryButton"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="wrap_content"
-                android:layout_height="44dp"
-                android:layout_marginTop="14dp"
-                android:text="@string/button_retry"
-                android:textAllCaps="false"
-                android:visibility="gone"
-                app:cornerRadius="14dp" />
-
-        </LinearLayout>
-
-    </com.google.android.material.card.MaterialCardView>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/districtInputLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:hint="@string/district_filter_hint"
-        android:visibility="gone"
-        app:boxBackgroundMode="outline"
-        app:boxCornerRadiusBottomEnd="14dp"
-        app:boxCornerRadiusBottomStart="14dp"
-        app:boxCornerRadiusTopEnd="14dp"
-        app:boxCornerRadiusTopStart="14dp"
-        app:endIconMode="dropdown_menu">
-
-        <com.google.android.material.textfield.MaterialAutoCompleteTextView
-            android:id="@+id/districtAutoCompleteTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:focusable="false"
-            android:inputType="none"
-            android:singleLine="true" />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/pharmacyRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="14dp"
-        android:layout_weight="1"
-        android:clipToPadding="false"
-        android:paddingBottom="16dp" />
-
-</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

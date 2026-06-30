@@ -79,6 +79,11 @@ dependencies {
 
     implementation(libs.androidx.datastore.preferences)
 
+    val navVersion = "2.9.8"
+
+    implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
+    implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
