@@ -2,7 +2,6 @@ package com.example.pharmacytrack.ui.favorites
 
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -23,7 +22,7 @@ class FavoritesFragment : Fragment(R.layout.fragment_favorites) {
     private val viewModel: FavoritesViewModel by viewModels()
 
     private lateinit var favoritesRecyclerView: RecyclerView
-    private lateinit var emptyFavoritesTextView: TextView
+    private lateinit var emptyFavoritesLayout: View
     private lateinit var pharmacyAdapter: PharmacyAdapter
 
     override fun onViewCreated(
@@ -39,7 +38,7 @@ class FavoritesFragment : Fragment(R.layout.fragment_favorites) {
 
     private fun bindViews(view: View) {
         favoritesRecyclerView = view.findViewById(R.id.favoritesRecyclerView)
-        emptyFavoritesTextView = view.findViewById(R.id.emptyFavoritesTextView)
+        emptyFavoritesLayout = view.findViewById(R.id.emptyFavoritesLayout)
     }
 
     private fun setupRecyclerView() {
@@ -92,14 +91,12 @@ class FavoritesFragment : Fragment(R.layout.fragment_favorites) {
 
     private fun showEmptyState() {
         favoritesRecyclerView.visibility = View.GONE
-        emptyFavoritesTextView.visibility = View.VISIBLE
+        emptyFavoritesLayout.visibility = View.VISIBLE
         pharmacyAdapter.submitList(emptyList())
     }
 
-    private fun showFavorites(
-        pharmacies: List<PharmacyUiModel>
-    ) {
-        emptyFavoritesTextView.visibility = View.GONE
+    private fun showFavorites(pharmacies: List<PharmacyUiModel>) {
+        emptyFavoritesLayout.visibility = View.GONE
         favoritesRecyclerView.visibility = View.VISIBLE
         pharmacyAdapter.submitList(pharmacies)
     }

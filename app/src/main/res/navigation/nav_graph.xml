@@ -7,11 +7,11 @@
     <fragment
         android:id="@+id/pharmacyListFragment"
         android:name="com.example.pharmacytrack.ui.pharmacy.PharmacyListFragment"
-        android:label="Nöbetçi Eczaneler" />
+        android:label="@string/nav_label_pharmacies" />
 
     <fragment
         android:id="@+id/favoritesFragment"
         android:name="com.example.pharmacytrack.ui.favorites.FavoritesFragment"
-        android:label="Favoriler" />
+        android:label="@string/nav_label_favorites" />
 
 </navigation>

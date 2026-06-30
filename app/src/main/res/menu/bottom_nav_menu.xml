@@ -4,11 +4,11 @@
     <item
         android:id="@+id/pharmacyListFragment"
         android:icon="@drawable/ic_location_24"
-        android:title="Eczaneler" />
+        android:title="@string/bottom_nav_pharmacies" />
 
     <item
         android:id="@+id/favoritesFragment"
         android:icon="@drawable/ic_star_filled_24"
-        android:title="Favoriler" />
+        android:title="@string/bottom_nav_favorites" />
 
 </menu>

@@ -5,6 +5,8 @@
     <string name="app_subtitle">Şehir seç, en yakın nöbetçi eczaneleri görüntüle.</string>
 
     <!-- b -->
+    <string name="bottom_nav_pharmacies">Eczaneler</string>
+    <string name="bottom_nav_favorites">Favoriler</string>
     <string name="button_loading">Yükleniyor...</string>
     <string name="button_loading_short">...</string>
     <string name="button_retry">Tekrar Dene</string>
@@ -33,8 +35,16 @@
     <string name="error_unknown">Beklenmeyen bir hata oluştu. Lütfen tekrar dene.</string>
 
     <!-- f -->
+    <string name="favorites_title">Favori Eczaneler</string>
+    <string name="favorites_subtitle">Kaydettiğin eczanelere hızlıca ulaşabilirsin.</string>
+    <string name="favorites_empty_title">Henüz favori eczane yok</string>
+    <string name="favorites_empty_message">Eczaneler sekmesinden yıldız simgesine dokunarak favori ekleyebilirsin.</string>
     <string name="favorite_add">Favorilere ekle</string>
     <string name="favorite_remove">Favorilerden çıkar</string>
+
+    <!-- n -->
+    <string name="nav_label_pharmacies">Nöbetçi Eczaneler</string>
+    <string name="nav_label_favorites">Favoriler</string>
 
     <!-- p -->
     <string name="pharmacy_unknown_name">İsimsiz Eczane</string>
