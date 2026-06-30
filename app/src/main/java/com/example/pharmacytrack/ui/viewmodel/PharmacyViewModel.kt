@@ -152,7 +152,9 @@ class PharmacyViewModel @Inject constructor(
 
     fun toggleFavorite(pharmacy: PharmacyUiModel) {
         viewModelScope.launch {
-            favoriteStore.toggleFavorite(pharmacy.favoriteKey)
+            favoriteStore.toggleFavorite(
+                pharmacy.toFavoritePharmacy()
+            )
         }
     }
 }
