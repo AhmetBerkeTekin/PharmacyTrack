@@ -36,6 +36,7 @@ class PharmacyViewModel @Inject constructor(
     private var currentCity: String = ""
     private var currentSource: String = ""
     private var currentLastUpdated: String = ""
+    private var hasTriedAutoLoadLastCity = false
     private var allPharmacies: List<Pharmacy> = emptyList()
     private var selectedDistrict: String? = null
     val lastCityFlow = userPreferences.lastCityFlow
@@ -142,6 +143,29 @@ class PharmacyViewModel @Inject constructor(
             .filter { it.isNotBlank() }
             .distinct()
             .sorted()
+    }
+
+    fun loadLastCityIfNeeded(city: String): Boolean {
+        if (hasTriedAutoLoadLastCity) {
+            return false
+        }
+
+        if (city.isBlank()) {
+            return false
+        }
+
+        if (currentCity.isNotBlank()) {
+            return false
+        }
+
+        hasTriedAutoLoadLastCity = true
+
+        getPharmacies(
+            city = city,
+            forceRefresh = false
+        )
+
+        return true
     }
 
     private fun emitSuccessState() {

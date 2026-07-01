@@ -216,8 +216,18 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.lastCityFlow.collect { city ->
-                    if (cityEditText.text.isNullOrBlank() && city.isNotBlank()) {
+                    if (city.isBlank()) {
+                        return@collect
+                    }
+
+                    if (cityEditText.text.isNullOrBlank()) {
                         cityEditText.setText(city, false)
+                    }
+
+                    val didStartAutoLoad = viewModel.loadLastCityIfNeeded(city)
+
+                    if (didStartAutoLoad) {
+                        shouldScroll = true
                     }
                 }
             }
