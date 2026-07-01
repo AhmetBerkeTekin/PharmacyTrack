@@ -43,6 +43,9 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
     private lateinit var stateCardView: MaterialCardView
     private lateinit var stateTitleTextView: TextView
     private lateinit var stateMessageTextView: TextView
+    private lateinit var sourceInfoTextView: TextView
+    private lateinit var sourceInfoRowLayout: View
+    private lateinit var refreshButton: MaterialButton
     private lateinit var retryButton: MaterialButton
 
     private var isUpdatingDistrictDropdown = false
@@ -74,6 +77,9 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         stateCardView = view.findViewById(R.id.stateCardView)
         stateTitleTextView = view.findViewById(R.id.stateTitleTextView)
         stateMessageTextView = view.findViewById(R.id.stateMessageTextView)
+        sourceInfoRowLayout = view.findViewById(R.id.sourceInfoRowLayout)
+        sourceInfoTextView = view.findViewById(R.id.sourceInfoTextView)
+        refreshButton = view.findViewById(R.id.refreshButton)
         retryButton = view.findViewById(R.id.retryButton)
     }
 
@@ -146,7 +152,9 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
                 PharmacyActionHelper.openMap(
                     context = requireContext(),
                     name = pharmacy.name,
-                    address = pharmacy.address
+                    address = pharmacy.address,
+                    district = pharmacy.district,
+                    city = pharmacy.city
                 )
             },
             onFavoriteClicked = { pharmacy ->
@@ -165,6 +173,11 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
     private fun setupClickListeners() {
         searchButton.setOnClickListener {
             searchPharmacies()
+        }
+
+        refreshButton.setOnClickListener {
+            shouldScroll = true
+            viewModel.refreshCurrentCity()
         }
 
         retryButton.setOnClickListener {
@@ -235,6 +248,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         hideLoadingIndicator()
         hideRecyclerView()
         hideStatusText()
+        hideSourceInfo()
         hideDistrictFilters()
         resetSearchButton()
         clearPharmacyList()
@@ -250,6 +264,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         showLoadingIndicator()
         hideRecyclerView()
         hideStatusText()
+        hideSourceInfo()
         hideDistrictFilters()
         setSearchButtonLoading()
         clearPharmacyList()
@@ -295,6 +310,11 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
             )
         )
 
+        showSourceInfo(
+            source = state.source,
+            lastUpdated = state.lastUpdatedAt
+        )
+
         pharmacyAdapter.submitList(state.pharmacies) {
             if (shouldScroll) {
                 pharmacyRecyclerView.scrollToPosition(0)
@@ -307,6 +327,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         hideLoadingIndicator()
         hideRecyclerView()
         hideStatusText()
+        hideSourceInfo()
         resetSearchButton()
         clearPharmacyList()
 
@@ -427,6 +448,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
     private fun showOnlyStateCard(title: String, message: String, showRetry: Boolean) {
         hideRecyclerView()
         hideStatusText()
+        hideSourceInfo()
 
         showStateCard(
             title = title,
@@ -438,5 +460,32 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
     private fun hideContentState() {
         hideStateCard()
         hideLoadingIndicator()
+    }
+
+    private fun showSourceInfo(source: String, lastUpdated: String) {
+        val sourceText = when (source.lowercase()) {
+            "live" -> getString(R.string.data_source_live)
+            "cache" -> getString(R.string.data_source_cache)
+            else -> getString(R.string.data_source_unknown)
+        }
+
+        sourceInfoRowLayout.visibility = View.VISIBLE
+
+        sourceInfoTextView.text = if (lastUpdated.isNotBlank()) {
+            getString(
+                R.string.source_info_with_update,
+                sourceText,
+                lastUpdated
+            )
+        } else {
+            getString(
+                R.string.source_info_without_update,
+                sourceText
+            )
+        }
+    }
+
+    private fun hideSourceInfo() {
+        sourceInfoRowLayout.visibility = View.GONE
     }
 }

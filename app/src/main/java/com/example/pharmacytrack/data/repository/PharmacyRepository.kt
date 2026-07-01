@@ -17,11 +17,9 @@ class PharmacyRepository @Inject constructor(
         private const val TAG = "PharmacyRepository"
     }
 
-    suspend fun getPharmacies(
-        city: String
-    ): AppResult<PharmacyResponse> {
+    suspend fun getPharmacies(city: String, forceRefresh: Boolean = false): AppResult<PharmacyResponse> {
         return try {
-            val response = apiService.getPharmaciesByCity(city.trim())
+            val response = apiService.getPharmaciesByCity(city.trim(), forceRefresh = forceRefresh)
 
             if (response.isSuccessful) {
                 val body = response.body()

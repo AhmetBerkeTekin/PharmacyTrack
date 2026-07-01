@@ -35,10 +35,12 @@ object PharmacyActionHelper {
         }
     }
 
-    fun openMap(context: Context, name: String?, address: String?) {
+    fun openMap(context: Context, name: String?, address: String?, district: String?, city: String?) {
         val query = listOfNotNull(
             name?.takeIf { it.isNotBlank() },
-        address?.takeIf { it.isNotBlank() }
+            address?.takeIf { it.isNotBlank() },
+            district?.takeIf { it.isNotBlank() },
+            city?.takeIf { it.isNotBlank() }
         ).joinToString(" ")
 
         if (query.isBlank()) {
@@ -54,17 +56,17 @@ object PharmacyActionHelper {
 
         val mapIntent = Intent(
             Intent.ACTION_VIEW,
-            "geo:0,0?q=$encodedQuery".toUri()
+            Uri.parse("geo:0,0?q=$encodedQuery")
         )
 
         try {
             context.startActivity(mapIntent)
         } catch (e: ActivityNotFoundException) {
-            Logger.E(TAG, "Map app not found! " + e.message)
+            Logger.E(TAG, "Map app not found. " + e.message)
 
             val webIntent = Intent(
                 Intent.ACTION_VIEW,
-                "https://www.google.com/maps/search/?api=1&query=$encodedQuery".toUri()
+                Uri.parse("https://www.google.com/maps/search/?api=1&query=$encodedQuery")
             )
 
             try {

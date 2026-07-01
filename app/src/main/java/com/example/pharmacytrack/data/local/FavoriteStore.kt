@@ -39,19 +39,22 @@ class FavoriteStore @Inject constructor(
                     parseFavoritePharmacy(favoriteJson)
                 }
                 .sortedBy { favoritePharmacy ->
-                    favoritePharmacy.name
+                    favoritePharmacy.name.orEmpty()
                 }
         }
 
     val favoriteKeysFlow: Flow<Set<String>> =
         favoritePharmaciesFlow.map { favoritePharmacies ->
             favoritePharmacies
-                .map { favoritePharmacy -> favoritePharmacy.favoriteKey }
+                .mapNotNull { favoritePharmacy ->
+                    favoritePharmacy.favoriteKey?.takeIf { it.isNotBlank() }
+                }
                 .toSet()
         }
 
     suspend fun toggleFavorite(favoritePharmacy: FavoritePharmacy) {
-        if (favoritePharmacy.favoriteKey.isBlank()) {
+        val favoriteKey = favoritePharmacy.favoriteKey.orEmpty()
+        if (favoriteKey.isBlank()) {
             Logger.W(TAG, "Favorite key is blank. Toggle ignored.")
             return
         }
@@ -64,14 +67,14 @@ class FavoriteStore @Inject constructor(
                 }
 
             val isAlreadyFavorite = currentFavorites.any { currentFavorite ->
-                currentFavorite.favoriteKey == favoritePharmacy.favoriteKey
+                currentFavorite.favoriteKey == favoriteKey
             }
 
             val updatedFavorites = if (isAlreadyFavorite) {
                 Logger.I(TAG, "Favorite removed. key=${favoritePharmacy.favoriteKey}")
 
                 currentFavorites.filterNot { currentFavorite ->
-                    currentFavorite.favoriteKey == favoritePharmacy.favoriteKey
+                    currentFavorite.favoriteKey == favoriteKey
                 }
             } else {
                 Logger.I(TAG, "Favorite added. key=${favoritePharmacy.favoriteKey}")

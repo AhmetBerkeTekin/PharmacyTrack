@@ -1,7 +1,6 @@
 package com.example.pharmacytrack.ui.pharmacy
 
 import com.example.pharmacytrack.core.ui.UiText
-import com.example.pharmacytrack.data.model.Pharmacy
 
 sealed interface PharmacyUiState {
     data object Idle : PharmacyUiState
@@ -10,6 +9,7 @@ sealed interface PharmacyUiState {
     data class Success(
         val city: String,
         val source: String,
+        val lastUpdatedAt: String,
         val pharmacies: List<PharmacyUiModel>,
         val districtOptions: List<String>,
         val selectedDistrict: String?

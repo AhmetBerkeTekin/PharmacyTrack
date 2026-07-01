@@ -89,6 +89,12 @@ class PharmacyAdapter(
                 context.getString(R.string.pharmacy_unknown_phone)
             }
 
+            val hasPhone = pharmacy.phone.isNotBlank()
+            val hasAddress = pharmacy.address.isNotBlank()
+
+            callButton.isEnabled = hasPhone
+            mapButton.isEnabled = hasAddress
+
             favoriteButton.setImageResource(
                 if (pharmacy.isFavorite) {
                     R.drawable.ic_star_filled_24

@@ -22,6 +22,10 @@ fun PharmacyResponse.resolveSource(): String {
     return source.orEmpty()
 }
 
+fun PharmacyResponse.resolveLastUpdated(): String {
+    return lastUpdated.orEmpty()
+}
+
 private fun Pharmacy.toSafePharmacy(): Pharmacy {
     return Pharmacy(
         district = district.orEmpty().trim(),

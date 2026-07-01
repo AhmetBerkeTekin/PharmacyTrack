@@ -1,6 +1,7 @@
 package com.example.pharmacytrack.ui.pharmacy
 
 data class PharmacyUiModel(
+    val city: String,
     val district: String,
     val name: String,
     val address: String,

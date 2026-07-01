@@ -1,0 +1,9 @@
+<resources>
+
+    <style name="Theme.PharmacyTrack.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/pharmacy_launcher_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_pharmacy_splash</item>
+        <item name="postSplashScreenTheme">@style/Theme.PharmacyTrack</item>
+    </style>
+
+</resources>

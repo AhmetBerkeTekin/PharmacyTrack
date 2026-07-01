@@ -53,7 +53,9 @@ class FavoritesFragment : Fragment(R.layout.fragment_favorites) {
                 PharmacyActionHelper.openMap(
                     context = requireContext(),
                     name = pharmacy.name,
-                    address = pharmacy.address
+                    address = pharmacy.address,
+                    district = pharmacy.district,
+                    city = pharmacy.city
                 )
             },
             onFavoriteClicked = { pharmacy ->

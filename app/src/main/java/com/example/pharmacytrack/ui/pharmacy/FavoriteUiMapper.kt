@@ -5,6 +5,7 @@ import com.example.pharmacytrack.data.local.FavoritePharmacy
 fun PharmacyUiModel.toFavoritePharmacy(): FavoritePharmacy {
     return FavoritePharmacy(
         favoriteKey = favoriteKey,
+        city = city,
         district = district,
         name = name,
         address = address,
@@ -13,12 +14,15 @@ fun PharmacyUiModel.toFavoritePharmacy(): FavoritePharmacy {
 }
 
 fun FavoritePharmacy.toPharmacyUiModel(): PharmacyUiModel {
+    val favoriteKeyValue = favoriteKey.orEmpty()
+
     return PharmacyUiModel(
-        district = district,
-        name = name,
-        address = address,
-        phone = phone,
-        favoriteKey = favoriteKey,
+        city = city.orEmpty(),
+        district = district.orEmpty(),
+        name = name.orEmpty(),
+        address = address.orEmpty(),
+        phone = phone.orEmpty(),
+        favoriteKey = favoriteKeyValue,
         isFavorite = true
     )
 }

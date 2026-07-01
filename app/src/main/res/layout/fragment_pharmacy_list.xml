@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mainLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -93,6 +94,39 @@
         tools:text="@string/state_idle_message"
         android:textColor="@color/pharmacy_text_secondary"
         android:textSize="14sp" />
+
+    <LinearLayout
+        android:id="@+id/sourceInfoRowLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/sourceInfoTextView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/pharmacy_text_secondary"
+            android:textSize="12sp"
+            tools:text="Kaynak: Canlı veri • Son güncelleme: 14:32" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/refreshButton"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:text="@string/button_refresh"
+            android:textAllCaps="false"
+            android:textSize="12sp" />
+
+    </LinearLayout>
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/stateCardView"

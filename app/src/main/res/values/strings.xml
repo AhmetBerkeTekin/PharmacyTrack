@@ -9,6 +9,7 @@
     <string name="bottom_nav_pharmacies">Eczaneler</string>
     <string name="button_loading">Yükleniyor...</string>
     <string name="button_loading_short">...</string>
+    <string name="button_refresh">Yenile</string>
     <string name="button_retry">Tekrar Dene</string>
     <string name="button_search_pharmacies">Eczaneleri Getir</string>
     <string name="button_search_short">Ara</string>
@@ -17,6 +18,9 @@
     <string name="city_filter_hint">Şehir</string>
 
     <!-- d -->
+    <string name="data_source_cache">Önbellek</string>
+    <string name="data_source_live">Canlı veri</string>
+    <string name="data_source_unknown">Bilinmiyor</string>
     <string name="district_filter_all">Tüm ilçeler</string>
     <string name="district_filter_hint">İlçe</string>
 
@@ -55,6 +59,8 @@
     <string name="pharmacy_unknown_phone">Telefon bilgisi bulunamadı.</string>
 
     <!-- s -->
+    <string name="source_info_with_update">Kaynak: %1$s • Son güncelleme: %2$s</string>
+    <string name="source_info_without_update">Kaynak: %1$s</string>
     <string name="state_empty_message">%1$s için nöbetçi eczane bulunamadı.</string>
     <string name="state_empty_title">Eczane bulunamadı</string>
     <string name="state_error_default_message">Eczane bilgileri alınamadı. Lütfen tekrar dene.</string>

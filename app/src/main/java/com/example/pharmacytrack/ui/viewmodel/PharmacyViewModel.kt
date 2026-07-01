@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 import com.example.pharmacytrack.data.mapper.resolveCityName
+import com.example.pharmacytrack.data.mapper.resolveLastUpdated
 import com.example.pharmacytrack.data.mapper.resolveSource
 import com.example.pharmacytrack.data.mapper.toSafePharmacyList
 
@@ -34,6 +35,7 @@ class PharmacyViewModel @Inject constructor(
 
     private var currentCity: String = ""
     private var currentSource: String = ""
+    private var currentLastUpdated: String = ""
     private var allPharmacies: List<Pharmacy> = emptyList()
     private var selectedDistrict: String? = null
     val lastCityFlow = userPreferences.lastCityFlow
@@ -55,7 +57,7 @@ class PharmacyViewModel @Inject constructor(
         }
     }
 
-    fun getPharmacies(city: String) {
+    fun getPharmacies(city: String, forceRefresh: Boolean = false) {
         val normalizedCity = city.trim()
 
         if (normalizedCity.isBlank()) {
@@ -69,7 +71,7 @@ class PharmacyViewModel @Inject constructor(
             _uiState.value = PharmacyUiState.Loading
 
             val apiCitySlug = normalizedCity.toApiCitySlug()
-            val result = repository.getPharmacies(apiCitySlug)
+            val result = repository.getPharmacies(apiCitySlug, forceRefresh)
 
             when (result) {
                 is AppResult.Success -> {
@@ -80,6 +82,7 @@ class PharmacyViewModel @Inject constructor(
                     )
 
                     currentSource = response.resolveSource()
+                    currentLastUpdated = response.resolveLastUpdated()
 
                     allPharmacies = response.toSafePharmacyList()
 
@@ -106,6 +109,17 @@ class PharmacyViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun refreshCurrentCity() {
+        if (currentCity.isBlank()) {
+            return
+        }
+
+        getPharmacies(
+            city = currentCity,
+            forceRefresh = true
+        )
     }
 
     fun selectDistrict(district: String?) {
@@ -142,7 +156,9 @@ class PharmacyViewModel @Inject constructor(
         _uiState.value = PharmacyUiState.Success(
             city = currentCity,
             source = currentSource,
+            lastUpdatedAt = currentLastUpdated,
             pharmacies = filteredPharmacies.toUiModels(
+                city = currentCity,
                 favoriteKeys = favoriteKeys
             ),
             districtOptions = districtOptions,
