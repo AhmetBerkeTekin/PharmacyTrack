@@ -9,6 +9,7 @@ import com.example.pharmacytrack.core.text.toApiCitySlug
 import com.example.pharmacytrack.core.ui.UiText
 import com.example.pharmacytrack.data.local.FavoriteStore
 import com.example.pharmacytrack.data.local.UserPreferences
+import com.example.pharmacytrack.data.mapper.resolveCheckedAt
 import com.example.pharmacytrack.data.model.Pharmacy
 import com.example.pharmacytrack.data.repository.PharmacyRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,7 +20,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 import com.example.pharmacytrack.data.mapper.resolveCityName
-import com.example.pharmacytrack.data.mapper.resolveLastUpdated
+import com.example.pharmacytrack.data.mapper.resolveDutyDate
+import com.example.pharmacytrack.data.mapper.resolveDutyDateLabel
 import com.example.pharmacytrack.data.mapper.resolveSource
 import com.example.pharmacytrack.data.mapper.toSafePharmacyList
 
@@ -35,7 +37,9 @@ class PharmacyViewModel @Inject constructor(
 
     private var currentCity: String = ""
     private var currentSource: String = ""
-    private var currentLastUpdated: String = ""
+    private var currentCheckedAt: String = ""
+    private var currentDutyDate: String = ""
+    private var currentDutyDateLabel: String = ""
     private var hasTriedAutoLoadLastCity = false
     private var allPharmacies: List<Pharmacy> = emptyList()
     private var selectedDistrict: String? = null
@@ -83,7 +87,9 @@ class PharmacyViewModel @Inject constructor(
                     )
 
                     currentSource = response.resolveSource()
-                    currentLastUpdated = response.resolveLastUpdated()
+                    currentCheckedAt = response.resolveCheckedAt()
+                    currentDutyDate = response.resolveDutyDate()
+                    currentDutyDateLabel = response.resolveDutyDateLabel()
 
                     allPharmacies = response.toSafePharmacyList()
 
@@ -180,7 +186,9 @@ class PharmacyViewModel @Inject constructor(
         _uiState.value = PharmacyUiState.Success(
             city = currentCity,
             source = currentSource,
-            lastUpdatedAt = currentLastUpdated,
+            checkedAt = currentCheckedAt,
+            dutyDate = currentDutyDate,
+            dutyDateLabel = currentDutyDateLabel,
             pharmacies = filteredPharmacies.toUiModels(
                 city = currentCity,
                 favoriteKeys = favoriteKeys

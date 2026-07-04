@@ -95,6 +95,17 @@
         android:textColor="@color/pharmacy_text_secondary"
         android:textSize="14sp" />
 
+    <TextView
+        android:id="@+id/dutyDateTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:maxLines="3"
+        android:textColor="@color/pharmacy_text_primary"
+        android:textSize="13sp"
+        android:visibility="gone"
+        tools:text="Nöbet zamanı: 4 Temmuz 2026 Cumartesi mesai bitiminden 5 Temmuz 2026 Pazar sabahına kadar" />
+
     <LinearLayout
         android:id="@+id/sourceInfoRowLayout"
         android:layout_width="match_parent"

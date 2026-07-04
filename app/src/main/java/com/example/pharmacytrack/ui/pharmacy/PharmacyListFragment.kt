@@ -44,6 +44,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
     private lateinit var stateTitleTextView: TextView
     private lateinit var stateMessageTextView: TextView
     private lateinit var sourceInfoTextView: TextView
+    private lateinit var dutyDateTextView: TextView
     private lateinit var sourceInfoRowLayout: View
     private lateinit var refreshButton: MaterialButton
     private lateinit var retryButton: MaterialButton
@@ -79,6 +80,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         stateMessageTextView = view.findViewById(R.id.stateMessageTextView)
         sourceInfoRowLayout = view.findViewById(R.id.sourceInfoRowLayout)
         sourceInfoTextView = view.findViewById(R.id.sourceInfoTextView)
+        dutyDateTextView = view.findViewById(R.id.dutyDateTextView)
         refreshButton = view.findViewById(R.id.refreshButton)
         retryButton = view.findViewById(R.id.retryButton)
     }
@@ -259,6 +261,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         hideRecyclerView()
         hideStatusText()
         hideSourceInfo()
+        hideDutyDateInfo()
         hideDistrictFilters()
         resetSearchButton()
         clearPharmacyList()
@@ -275,6 +278,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         hideRecyclerView()
         hideStatusText()
         hideSourceInfo()
+        hideDutyDateInfo()
         hideDistrictFilters()
         setSearchButtonLoading()
         clearPharmacyList()
@@ -320,9 +324,13 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
             )
         )
 
+        showDutyDateInfo(
+            dutyDateLabel = state.dutyDateLabel
+        )
+
         showSourceInfo(
             source = state.source,
-            lastUpdated = state.lastUpdatedAt
+            checkedAt = state.checkedAt
         )
 
         pharmacyAdapter.submitList(state.pharmacies) {
@@ -338,6 +346,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         hideRecyclerView()
         hideStatusText()
         hideSourceInfo()
+        hideDutyDateInfo()
         resetSearchButton()
         clearPharmacyList()
 
@@ -459,6 +468,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         hideRecyclerView()
         hideStatusText()
         hideSourceInfo()
+        hideDutyDateInfo()
 
         showStateCard(
             title = title,
@@ -472,7 +482,10 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         hideLoadingIndicator()
     }
 
-    private fun showSourceInfo(source: String, lastUpdated: String) {
+    private fun showSourceInfo(
+        source: String,
+        checkedAt: String
+    ) {
         val sourceText = when (source.lowercase()) {
             "live" -> getString(R.string.data_source_live)
             "cache" -> getString(R.string.data_source_cache)
@@ -480,16 +493,17 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         }
 
         sourceInfoRowLayout.visibility = View.VISIBLE
+        sourceInfoTextView.visibility = View.VISIBLE
 
-        sourceInfoTextView.text = if (lastUpdated.isNotBlank()) {
+        sourceInfoTextView.text = if (checkedAt.isNotBlank()) {
             getString(
-                R.string.source_info_with_update,
+                R.string.source_info_with_check_time,
                 sourceText,
-                lastUpdated
+                checkedAt
             )
         } else {
             getString(
-                R.string.source_info_without_update,
+                R.string.source_info_without_check_time,
                 sourceText
             )
         }
@@ -497,5 +511,22 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
 
     private fun hideSourceInfo() {
         sourceInfoRowLayout.visibility = View.GONE
+    }
+
+    private fun showDutyDateInfo(dutyDateLabel: String) {
+        if (dutyDateLabel.isBlank()) {
+            hideDutyDateInfo()
+            return
+        }
+
+        dutyDateTextView.visibility = View.VISIBLE
+        dutyDateTextView.text = getString(
+            R.string.duty_period,
+            dutyDateLabel
+        )
+    }
+
+    private fun hideDutyDateInfo() {
+        dutyDateTextView.visibility = View.GONE
     }
 }

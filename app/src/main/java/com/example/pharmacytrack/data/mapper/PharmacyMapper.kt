@@ -22,8 +22,16 @@ fun PharmacyResponse.resolveSource(): String {
     return source.orEmpty()
 }
 
-fun PharmacyResponse.resolveLastUpdated(): String {
-    return lastUpdated.orEmpty()
+fun PharmacyResponse.resolveCheckedAt(): String {
+    return checkedAt.orEmpty().trim()
+}
+
+fun PharmacyResponse.resolveDutyDate(): String {
+    return dutyDate.orEmpty().trim()
+}
+
+fun PharmacyResponse.resolveDutyDateLabel(): String {
+    return dutyDateLabel.orEmpty().trim()
 }
 
 private fun Pharmacy.toSafePharmacy(): Pharmacy {

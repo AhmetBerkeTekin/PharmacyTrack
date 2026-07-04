@@ -23,6 +23,7 @@
     <string name="data_source_unknown">Bilinmiyor</string>
     <string name="district_filter_all">Tüm ilçeler</string>
     <string name="district_filter_hint">İlçe</string>
+    <string name="duty_period">Nöbet zamanı: %1$s</string>
 
     <!-- e -->
     <string name="error_address_not_found">Adres bilgisi bulunamadı.</string>
@@ -59,8 +60,8 @@
     <string name="pharmacy_unknown_phone">Telefon bilgisi bulunamadı.</string>
 
     <!-- s -->
-    <string name="source_info_with_update">Kaynak: %1$s • Son güncelleme: %2$s</string>
-    <string name="source_info_without_update">Kaynak: %1$s</string>
+    <string name="source_info_with_check_time">Kaynak: %1$s • Kontrol: %2$s</string>
+    <string name="source_info_without_check_time">Kaynak: %1$s</string>
     <string name="state_empty_message">%1$s için nöbetçi eczane bulunamadı.</string>
     <string name="state_empty_title">Eczane bulunamadı</string>
     <string name="state_error_default_message">Eczane bilgileri alınamadı. Lütfen tekrar dene.</string>
