@@ -45,10 +45,8 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
     private lateinit var stateCardView: MaterialCardView
     private lateinit var stateTitleTextView: TextView
     private lateinit var stateMessageTextView: TextView
-    private lateinit var sourceInfoTextView: TextView
     private lateinit var dutyDateTextView: TextView
     private lateinit var resultLocationTextView: TextView
-    private lateinit var sourceInfoRowLayout: View
     private lateinit var retryButton: MaterialButton
 
     private var isUpdatingDistrictDropdown = false
@@ -82,8 +80,6 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         stateCardView = view.findViewById(R.id.stateCardView)
         stateTitleTextView = view.findViewById(R.id.stateTitleTextView)
         stateMessageTextView = view.findViewById(R.id.stateMessageTextView)
-        sourceInfoRowLayout = view.findViewById(R.id.sourceInfoRowLayout)
-        sourceInfoTextView = view.findViewById(R.id.sourceInfoTextView)
         dutyDateTextView = view.findViewById(R.id.dutyDateTextView)
         resultLocationTextView = view.findViewById(R.id.resultLocationTextView)
         retryButton = view.findViewById(R.id.retryButton)
@@ -283,7 +279,6 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         hideLoadingIndicator()
         hideRecyclerView()
         hideStatusText()
-        hideSourceInfo()
         hideDutyDateInfo()
         hideDistrictFilters()
         resetSearchButton()
@@ -301,7 +296,6 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         showLoadingIndicator()
         hideRecyclerView()
         hideStatusText()
-        hideSourceInfo()
         hideDutyDateInfo()
         hideDistrictFilters()
         setSearchButtonLoading()
@@ -358,11 +352,6 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
             dutyDate = state.dutyDate
         )
 
-        showSourceInfo(
-            source = state.source,
-            checkedAt = state.checkedAt
-        )
-
         pharmacyAdapter.submitList(state.pharmacies) {
             if (shouldScroll) {
                 pharmacyRecyclerView.scrollToPosition(0)
@@ -376,7 +365,6 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         hideLoadingIndicator()
         hideRecyclerView()
         hideStatusText()
-        hideSourceInfo()
         hideDutyDateInfo()
         resetSearchButton()
         clearPharmacyList()
@@ -489,7 +477,6 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         resultSummaryCardView.visibility = View.GONE
         hideRecyclerView()
         hideStatusText()
-        hideSourceInfo()
         hideDutyDateInfo()
 
         showStateCard(
@@ -502,37 +489,6 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
     private fun hideContentState() {
         hideStateCard()
         hideLoadingIndicator()
-    }
-
-    private fun showSourceInfo(
-        source: String,
-        checkedAt: String
-    ) {
-        val sourceText = when (source.lowercase()) {
-            "live" -> getString(R.string.data_source_live)
-            "cache" -> getString(R.string.data_source_cache)
-            else -> getString(R.string.data_source_unknown)
-        }
-
-        sourceInfoRowLayout.visibility = View.VISIBLE
-        sourceInfoTextView.visibility = View.VISIBLE
-
-        sourceInfoTextView.text = if (checkedAt.isNotBlank()) {
-            getString(
-                R.string.source_info_with_check_time,
-                sourceText,
-                checkedAt
-            )
-        } else {
-            getString(
-                R.string.source_info_without_check_time,
-                sourceText
-            )
-        }
-    }
-
-    private fun hideSourceInfo() {
-        sourceInfoRowLayout.visibility = View.GONE
     }
 
     private fun showDutyDateInfo(dutyDate: String) {

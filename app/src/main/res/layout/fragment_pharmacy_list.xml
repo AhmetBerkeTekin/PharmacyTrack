@@ -237,34 +237,6 @@
                 android:visibility="gone"
                 tools:text="4 Temmuz Cumartesi mesai bitimi&#10;5 Temmuz Pazar sabahı"
                 tools:visibility="visible" />
-
-            <LinearLayout
-                android:id="@+id/sourceInfoRowLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:visibility="gone"
-                tools:visibility="visible">
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/sourceInfoTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:clickable="false"
-                    android:focusable="false"
-                    android:textColor="@color/pharmacy_text_secondary"
-                    android:textSize="12sp"
-                    app:chipBackgroundColor="@color/pharmacy_background"
-                    app:chipCornerRadius="10dp"
-                    app:chipMinHeight="30dp"
-                    app:chipStrokeColor="@color/pharmacy_border"
-                    app:chipStrokeWidth="1dp"
-                    tools:text="Canlı veri • 19:32’de kontrol edildi" />
-
-            </LinearLayout>
-
         </LinearLayout>
 
     </com.google.android.material.card.MaterialCardView>

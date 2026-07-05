@@ -93,7 +93,10 @@ class PharmacyAdapter(
             val hasAddress = pharmacy.address.isNotBlank()
 
             callButton.isEnabled = hasPhone
+            callButton.alpha = if (hasPhone) 1f else 0.5f
+
             mapButton.isEnabled = hasAddress
+            mapButton.alpha = if (hasAddress) 1f else 0.5f
 
             favoriteButton.setImageResource(
                 if (pharmacy.isFavorite) {

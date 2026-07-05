@@ -68,6 +68,7 @@ class FavoritesFragment : Fragment(R.layout.fragment_favorites) {
             adapter = pharmacyAdapter
             setHasFixedSize(false)
             itemAnimator = null
+            overScrollMode = View.OVER_SCROLL_NEVER
         }
     }
 
@@ -98,8 +99,14 @@ class FavoritesFragment : Fragment(R.layout.fragment_favorites) {
     }
 
     private fun showFavorites(pharmacies: List<PharmacyUiModel>) {
+        if (pharmacies.isEmpty()) {
+            showEmptyState()
+            return
+        }
+
         emptyFavoritesLayout.visibility = View.GONE
         favoritesRecyclerView.visibility = View.VISIBLE
+
         pharmacyAdapter.submitList(pharmacies)
     }
 }

@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/pharmacyCardView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="14dp"
+    android:layout_marginBottom="12dp"
     app:cardBackgroundColor="@color/pharmacy_surface"
     app:cardCornerRadius="20dp"
-    app:cardElevation="1dp"
+    app:cardElevation="0dp"
     app:strokeColor="@color/pharmacy_border"
     app:strokeWidth="1dp">
 
@@ -16,37 +17,53 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="17dp">
 
+        <!-- Başlık alanı -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
+            android:gravity="top"
             android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/pharmacyNameTextView"
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
+                android:layout_marginEnd="8dp"
                 android:layout_weight="1"
-                android:textColor="@color/pharmacy_text_primary"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                tools:text="Keklik Eczanesi" />
+                android:orientation="vertical">
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/districtChip"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="4dp"
-                android:clickable="false"
-                android:focusable="false"
-                android:textColor="@color/pharmacy_primary"
-                android:textSize="12sp"
-                app:chipBackgroundColor="#E8F5EF"
-                app:chipMinHeight="30dp"
-                tools:text="Aladağ" />
+                <TextView
+                    android:id="@+id/pharmacyNameTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:includeFontPadding="false"
+                    android:maxLines="2"
+                    android:textColor="@color/pharmacy_text_primary"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    tools:text="Keklik Eczanesi" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/districtChip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28dp"
+                    android:layout_marginTop="8dp"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:includeFontPadding="false"
+                    android:textColor="@color/pharmacy_primary"
+                    android:textSize="12sp"
+                    app:chipBackgroundColor="#E8F5EF"
+                    app:chipCornerRadius="9dp"
+                    app:chipMinHeight="28dp"
+                    app:chipStartPadding="5dp"
+                    app:chipEndPadding="5dp"
+                    app:ensureMinTouchTargetSize="false"
+                    tools:text="Aladağ" />
+
+            </LinearLayout>
 
             <ImageButton
                 android:id="@+id/favoriteButton"
@@ -55,15 +72,17 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/favorite_add"
                 android:padding="8dp"
-                android:src="@drawable/ic_star_border_24" />
+                android:src="@drawable/ic_star_border_24"
+                android:tint="@color/pharmacy_primary" />
 
         </LinearLayout>
 
+        <!-- Adres -->
         <LinearLayout
             android:id="@+id/addressRow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
+            android:layout_marginTop="16dp"
             android:gravity="top"
             android:orientation="horizontal">
 
@@ -72,7 +91,8 @@
                 android:layout_height="20dp"
                 android:layout_marginTop="1dp"
                 android:contentDescription="@null"
-                android:src="@drawable/ic_location_24" />
+                android:src="@drawable/ic_location_24"
+                android:tint="@color/pharmacy_text_secondary" />
 
             <TextView
                 android:id="@+id/addressTextView"
@@ -81,26 +101,31 @@
                 android:layout_marginStart="10dp"
                 android:layout_weight="1"
                 android:ellipsize="end"
+                android:includeFontPadding="false"
+                android:lineSpacingExtra="2dp"
                 android:maxLines="3"
-                tools:text="Mansurlu Mahallesi, İnönü Caddesi, No:105 Aladağ / Adana"
                 android:textColor="@color/pharmacy_text_secondary"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                tools:text="Mansurlu Mahallesi, İnönü Caddesi, No:105 Aladağ / Adana" />
 
         </LinearLayout>
 
+        <!-- Telefon -->
         <LinearLayout
             android:id="@+id/phoneRow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:gravity="center_vertical"
+            android:layout_marginTop="12dp"
+            android:gravity="top"
             android:orientation="horizontal">
 
             <ImageView
                 android:layout_width="20dp"
                 android:layout_height="20dp"
+                android:layout_marginTop="1dp"
                 android:contentDescription="@null"
-                android:src="@drawable/ic_phone_24" />
+                android:src="@drawable/ic_phone_24"
+                android:tint="@color/pharmacy_text_secondary" />
 
             <TextView
                 android:id="@+id/phoneTextView"
@@ -108,48 +133,75 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:layout_weight="1"
-                tools:text="0 (322) 591-24-24"
+                android:autoLink="phone"
+                android:includeFontPadding="false"
+                android:lineSpacingExtra="2dp"
+                android:maxLines="2"
                 android:textColor="@color/pharmacy_text_primary"
                 android:textSize="14sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                tools:text="0 (322) 591-24-24" />
 
         </LinearLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:background="@color/pharmacy_border" />
+
+        <!-- Aksiyonlar -->
         <LinearLayout
             android:id="@+id/actionButtonLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:gravity="end"
+            android:layout_height="48dp"
+            android:layout_marginTop="14dp"
+            android:baselineAligned="false"
             android:orientation="horizontal">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/callButton"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="0dp"
-                android:layout_height="46dp"
+                android:layout_height="48dp"
                 android:layout_marginEnd="8dp"
                 android:layout_weight="1"
-                android:text="@string/button_search_short"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="@string/button_call"
                 android:textAllCaps="false"
+                android:textSize="13sp"
                 android:textStyle="bold"
                 app:cornerRadius="14dp"
                 app:icon="@drawable/ic_phone_24"
                 app:iconGravity="textStart"
-                app:iconPadding="6dp" />
+                app:iconPadding="6dp"
+                app:iconSize="18dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/mapButton"
                 android:layout_width="0dp"
-                android:layout_height="46dp"
+                android:layout_height="48dp"
                 android:layout_weight="1"
-                tools:text="Haritada Aç"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="@string/button_open_map"
                 android:textAllCaps="false"
+                android:textSize="13sp"
                 android:textStyle="bold"
                 app:cornerRadius="14dp"
                 app:icon="@drawable/ic_map_24"
                 app:iconGravity="textStart"
-                app:iconPadding="6dp" />
+                app:iconPadding="6dp"
+                app:iconSize="18dp" />
 
         </LinearLayout>
 
