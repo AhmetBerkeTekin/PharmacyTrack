@@ -7,15 +7,18 @@
     android:layout_height="match_parent"
     android:background="@color/pharmacy_background"
     android:orientation="vertical"
-    android:padding="20dp">
+    android:paddingStart="16dp"
+    android:paddingTop="20dp"
+    android:paddingEnd="16dp">
 
     <TextView
         android:id="@+id/titleTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:includeFontPadding="false"
         android:text="@string/app_title"
         android:textColor="@color/pharmacy_text_primary"
-        android:textSize="26sp"
+        android:textSize="27sp"
         android:textStyle="bold" />
 
     <TextView
@@ -23,130 +26,257 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
+        android:includeFontPadding="false"
         android:text="@string/app_subtitle"
         android:textColor="@color/pharmacy_text_secondary"
         android:textSize="14sp" />
 
-    <LinearLayout
-        android:id="@+id/searchRowLayout"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/searchCardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="18dp"
-        android:baselineAligned="false"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:layout_marginTop="20dp"
+        app:cardBackgroundColor="@color/pharmacy_surface"
+        app:cardCornerRadius="22dp"
+        app:cardElevation="0dp"
+        app:strokeColor="@color/pharmacy_border"
+        app:strokeWidth="1dp">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/cityInputLayout"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
-            android:layout_weight="1"
-            android:hint="@string/city_filter_hint"
-            app:boxBackgroundMode="outline"
-            app:boxCornerRadiusBottomEnd="14dp"
-            app:boxCornerRadiusBottomStart="14dp"
-            app:boxCornerRadiusTopEnd="14dp"
-            app:boxCornerRadiusTopStart="14dp"
-            app:endIconMode="dropdown_menu">
+            android:orientation="vertical"
+            android:padding="14dp">
 
-            <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                android:id="@+id/cityEditText"
+            <LinearLayout
+                android:id="@+id/searchRowLayout"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:completionThreshold="1"
+                android:layout_height="56dp"
+                android:baselineAligned="false"
                 android:gravity="center_vertical"
-                android:inputType="textCapWords"
-                android:paddingTop="0dp"
-                android:paddingBottom="0dp"
-                android:singleLine="true" />
+                android:orientation="horizontal">
 
-        </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/cityInputLayout"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    app:boxBackgroundColor="@color/pharmacy_background"
+                    app:boxBackgroundMode="filled"
+                    app:boxCornerRadiusBottomEnd="16dp"
+                    app:boxCornerRadiusBottomStart="16dp"
+                    app:boxCornerRadiusTopEnd="16dp"
+                    app:boxCornerRadiusTopStart="16dp"
+                    app:boxStrokeWidth="0dp"
+                    app:boxStrokeWidthFocused="1dp"
+                    app:endIconMode="dropdown_menu"
+                    app:hintEnabled="false">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/searchButton"
-            android:layout_width="72dp"
-            android:layout_height="48dp"
-            android:minWidth="0dp"
-            android:minHeight="0dp"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:text="@string/button_search_short"
-            android:textAllCaps="false"
-            android:textStyle="bold"
-            app:cornerRadius="13dp" />
+                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                        android:id="@+id/cityEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:clickable="true"
+                        android:cursorVisible="false"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        android:gravity="center_vertical"
+                        android:hint="@string/city_filter_hint"
+                        android:includeFontPadding="false"
+                        android:inputType="none"
+                        android:longClickable="false"
+                        android:paddingStart="16dp"
+                        android:paddingTop="0dp"
+                        android:paddingEnd="8dp"
+                        android:paddingBottom="0dp"
+                        android:singleLine="true"
+                        android:textColor="@color/pharmacy_text_primary"
+                        android:textColorHint="@color/pharmacy_text_secondary"
+                        android:textSize="15sp" />
 
-    </LinearLayout>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/searchButton"
+                    android:layout_width="84dp"
+                    android:layout_height="56dp"
+                    android:layout_marginStart="10dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:text="@string/button_search_short"
+                    android:textAllCaps="false"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="16dp" />
+
+            </LinearLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/districtInputLayout"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="10dp"
+                android:visibility="gone"
+                app:boxBackgroundColor="@color/pharmacy_background"
+                app:boxBackgroundMode="filled"
+                app:boxCornerRadiusBottomEnd="16dp"
+                app:boxCornerRadiusBottomStart="16dp"
+                app:boxCornerRadiusTopEnd="16dp"
+                app:boxCornerRadiusTopStart="16dp"
+                app:boxStrokeWidth="0dp"
+                app:boxStrokeWidthFocused="1dp"
+                app:endIconMode="dropdown_menu"
+                app:hintEnabled="false"
+                tools:visibility="visible">
+
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/districtAutoCompleteTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clickable="true"
+                    android:cursorVisible="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:gravity="center_vertical"
+                    android:hint="@string/district_filter_hint"
+                    android:includeFontPadding="false"
+                    android:inputType="none"
+                    android:longClickable="false"
+                    android:paddingStart="16dp"
+                    android:paddingTop="0dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="0dp"
+                    android:singleLine="true"
+                    android:textColor="@color/pharmacy_text_primary"
+                    android:textColorHint="@color/pharmacy_text_secondary"
+                    android:textSize="15sp" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
 
     <ProgressBar
         android:id="@+id/loadingProgressBar"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="22dp"
         android:visibility="gone" />
 
-    <TextView
-        android:id="@+id/statusTextView"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/resultSummaryCardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="18dp"
-        tools:text="@string/state_idle_message"
-        android:textColor="@color/pharmacy_text_secondary"
-        android:textSize="14sp" />
-
-    <TextView
-        android:id="@+id/dutyDateTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:maxLines="3"
-        android:textColor="@color/pharmacy_text_primary"
-        android:textSize="13sp"
+        android:layout_marginTop="14dp"
         android:visibility="gone"
-        tools:text="Nöbet zamanı: 4 Temmuz 2026 Cumartesi mesai bitiminden 5 Temmuz 2026 Pazar sabahına kadar" />
+        app:cardBackgroundColor="@color/pharmacy_surface"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        app:strokeColor="@color/pharmacy_border"
+        app:strokeWidth="1dp"
+        tools:visibility="visible">
 
-    <LinearLayout
-        android:id="@+id/sourceInfoRowLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/sourceInfoTextView"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="@color/pharmacy_text_secondary"
-            android:textSize="12sp"
-            tools:text="Kaynak: Canlı veri • Son güncelleme: 14:32" />
+            android:orientation="vertical"
+            android:padding="18dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/refreshButton"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:minHeight="0dp"
-            android:minWidth="0dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:text="@string/button_refresh"
-            android:textAllCaps="false"
-            android:textSize="12sp" />
+            <TextView
+                android:id="@+id/resultLocationTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:textColor="@color/pharmacy_text_secondary"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                tools:text="İstanbul / Kadıköy" />
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/statusTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:includeFontPadding="false"
+                android:textColor="@color/pharmacy_text_primary"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                tools:text="112 nöbetçi eczane" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="14dp"
+                android:background="@color/pharmacy_border" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:text="@string/duty_period_title"
+                android:textColor="@color/pharmacy_text_secondary"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/dutyDateTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:includeFontPadding="false"
+                android:lineSpacingExtra="3dp"
+                android:textColor="@color/pharmacy_text_primary"
+                android:textSize="14sp"
+                android:visibility="gone"
+                tools:text="4 Temmuz Cumartesi mesai bitimi&#10;5 Temmuz Pazar sabahı"
+                tools:visibility="visible" />
+
+            <LinearLayout
+                android:id="@+id/sourceInfoRowLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/sourceInfoTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:textColor="@color/pharmacy_text_secondary"
+                    android:textSize="12sp"
+                    app:chipBackgroundColor="@color/pharmacy_background"
+                    app:chipCornerRadius="10dp"
+                    app:chipMinHeight="30dp"
+                    app:chipStrokeColor="@color/pharmacy_border"
+                    app:chipStrokeWidth="1dp"
+                    tools:text="Canlı veri • 19:32’de kontrol edildi" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/stateCardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="18dp"
+        android:layout_marginTop="14dp"
         android:visibility="gone"
         app:cardBackgroundColor="@color/pharmacy_surface"
-        app:cardCornerRadius="18dp"
+        app:cardCornerRadius="20dp"
         app:cardElevation="0dp"
         app:strokeColor="@color/pharmacy_border"
         app:strokeWidth="1dp">
@@ -161,6 +291,7 @@
                 android:id="@+id/stateTitleTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:includeFontPadding="false"
                 android:text="@string/state_idle_title"
                 android:textColor="@color/pharmacy_text_primary"
                 android:textSize="17sp"
@@ -171,6 +302,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
+                android:includeFontPadding="false"
+                android:lineSpacingExtra="2dp"
                 android:text="@string/state_idle_message"
                 android:textColor="@color/pharmacy_text_secondary"
                 android:textSize="14sp" />
@@ -181,6 +314,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="44dp"
                 android:layout_marginTop="14dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:minHeight="0dp"
                 android:text="@string/button_retry"
                 android:textAllCaps="false"
                 android:visibility="gone"
@@ -190,35 +326,11 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/districtInputLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:hint="@string/district_filter_hint"
-        android:visibility="gone"
-        app:boxBackgroundMode="outline"
-        app:boxCornerRadiusBottomEnd="14dp"
-        app:boxCornerRadiusBottomStart="14dp"
-        app:boxCornerRadiusTopEnd="14dp"
-        app:boxCornerRadiusTopStart="14dp"
-        app:endIconMode="dropdown_menu">
-
-        <com.google.android.material.textfield.MaterialAutoCompleteTextView
-            android:id="@+id/districtAutoCompleteTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:focusable="false"
-            android:inputType="none"
-            android:singleLine="true" />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/pharmacyRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="14dp"
+        android:layout_marginTop="12dp"
         android:layout_weight="1"
         android:clipToPadding="false"
         android:paddingBottom="16dp" />

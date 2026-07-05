@@ -1,10 +1,8 @@
 package com.example.pharmacytrack.ui.pharmacy
 
-import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -24,6 +22,9 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputLayout
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -32,9 +33,10 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
     private val viewModel: PharmacyViewModel by viewModels()
 
     private lateinit var pharmacyAdapter: PharmacyAdapter
-
+    private lateinit var cityInputLayout: TextInputLayout
     private lateinit var cityEditText: MaterialAutoCompleteTextView
     private lateinit var searchButton: MaterialButton
+    private lateinit var resultSummaryCardView: MaterialCardView
     private lateinit var statusTextView: TextView
     private lateinit var loadingProgressBar: ProgressBar
     private lateinit var pharmacyRecyclerView: RecyclerView
@@ -45,8 +47,8 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
     private lateinit var stateMessageTextView: TextView
     private lateinit var sourceInfoTextView: TextView
     private lateinit var dutyDateTextView: TextView
+    private lateinit var resultLocationTextView: TextView
     private lateinit var sourceInfoRowLayout: View
-    private lateinit var refreshButton: MaterialButton
     private lateinit var retryButton: MaterialButton
 
     private var isUpdatingDistrictDropdown = false
@@ -68,8 +70,10 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
     }
 
     private fun bindViews(view: View) {
+        cityInputLayout = view.findViewById(R.id.cityInputLayout)
         cityEditText = view.findViewById(R.id.cityEditText)
         searchButton = view.findViewById(R.id.searchButton)
+        resultSummaryCardView = view.findViewById(R.id.resultSummaryCardView)
         statusTextView = view.findViewById(R.id.statusTextView)
         loadingProgressBar = view.findViewById(R.id.loadingProgressBar)
         pharmacyRecyclerView = view.findViewById(R.id.pharmacyRecyclerView)
@@ -81,7 +85,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         sourceInfoRowLayout = view.findViewById(R.id.sourceInfoRowLayout)
         sourceInfoTextView = view.findViewById(R.id.sourceInfoTextView)
         dutyDateTextView = view.findViewById(R.id.dutyDateTextView)
-        refreshButton = view.findViewById(R.id.refreshButton)
+        resultLocationTextView = view.findViewById(R.id.resultLocationTextView)
         retryButton = view.findViewById(R.id.retryButton)
     }
 
@@ -92,53 +96,71 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
             cityProvider.cities
         )
 
-        cityEditText.setAdapter(cityAdapter)
-        cityEditText.threshold = 1
+        cityEditText.apply {
+            setAdapter(cityAdapter)
 
-        cityEditText.setOnClickListener {
+            threshold = 0
+            keyListener = null
+            isCursorVisible = false
+
+            setOnClickListener {
+                showDropDown()
+            }
+
+            setOnItemClickListener { parent, _, position, _ ->
+                val selectedCity = parent
+                    .getItemAtPosition(position)
+                    .toString()
+
+                setText(selectedCity, false)
+                dismissDropDown()
+                clearFocus()
+
+                cityInputLayout.error = null
+            }
+        }
+
+        cityInputLayout.setEndIconOnClickListener {
             cityEditText.showDropDown()
-        }
-
-        cityEditText.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
-                cityEditText.showDropDown()
-            }
-        }
-
-        cityEditText.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
-                actionId == EditorInfo.IME_ACTION_DONE
-            ) {
-                searchPharmacies()
-                true
-            } else {
-                false
-            }
         }
     }
 
     private fun setupDistrictDropdown() {
-        districtAutoCompleteTextView.keyListener = null
+        districtAutoCompleteTextView.apply {
+            keyListener = null
+            isCursorVisible = false
 
-        districtAutoCompleteTextView.setOnClickListener {
-            districtAutoCompleteTextView.showDropDown()
+            setOnClickListener {
+                showDropDown()
+            }
+
+            setOnItemClickListener { parent, _, position, _ ->
+                if (isUpdatingDistrictDropdown) {
+                    return@setOnItemClickListener
+                }
+
+                val selectedText = parent
+                    .getItemAtPosition(position)
+                    .toString()
+
+                setText(selectedText, false)
+                dismissDropDown()
+                clearFocus()
+
+                val selectedDistrict =
+                    if (selectedText == getString(R.string.district_filter_all)) {
+                        null
+                    } else {
+                        selectedText
+                    }
+
+                shouldScroll = true
+                viewModel.selectDistrict(selectedDistrict)
+            }
         }
 
-        districtAutoCompleteTextView.setOnItemClickListener { parent, _, position, _ ->
-            if (isUpdatingDistrictDropdown) {
-                return@setOnItemClickListener
-            }
-
-            val selectedText = parent.getItemAtPosition(position) as String
-
-            val selectedDistrict = if (selectedText == getString(R.string.district_filter_all)) {
-                null
-            } else {
-                selectedText
-            }
-
-            shouldScroll = true
-            viewModel.selectDistrict(selectedDistrict)
+        districtInputLayout.setEndIconOnClickListener {
+            districtAutoCompleteTextView.showDropDown()
         }
     }
 
@@ -177,28 +199,28 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
             searchPharmacies()
         }
 
-        refreshButton.setOnClickListener {
-            shouldScroll = true
-            viewModel.refreshCurrentCity()
-        }
-
         retryButton.setOnClickListener {
             searchPharmacies()
         }
     }
 
     private fun searchPharmacies() {
-        val inputCity = cityEditText.text?.toString().orEmpty()
+        val inputCity = cityEditText.text
+            ?.toString()
+            .orEmpty()
+
         val matchedCity = cityProvider.findValidCity(inputCity)
 
         if (matchedCity == null) {
-            cityEditText.error = getString(R.string.error_invalid_city)
+            cityInputLayout.error = getString(R.string.error_invalid_city)
             return
         }
 
-        cityEditText.error = null
-        hideKeyboard()
+        cityInputLayout.error = null
+
+        cityEditText.dismissDropDown()
         cityEditText.clearFocus()
+        districtAutoCompleteTextView.clearFocus()
 
         shouldScroll = true
         viewModel.getPharmacies(matchedCity)
@@ -257,6 +279,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
     }
 
     private fun showIdle() {
+        resultSummaryCardView.visibility = View.GONE
         hideLoadingIndicator()
         hideRecyclerView()
         hideStatusText()
@@ -274,6 +297,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
     }
 
     private fun showLoading() {
+        resultSummaryCardView.visibility = View.GONE
         showLoadingIndicator()
         hideRecyclerView()
         hideStatusText()
@@ -291,6 +315,8 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
     }
 
     private fun showSuccess(state: PharmacyUiState.Success) {
+        resultSummaryCardView.visibility = View.VISIBLE
+        stateCardView.visibility = View.GONE
         hideContentState()
         resetSearchButton()
         showDistrictFilters(state)
@@ -306,7 +332,10 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
 
             showOnlyStateCard(
                 title = getString(R.string.state_empty_title),
-                message = getString(R.string.state_empty_message, locationText),
+                message = getString(
+                    R.string.state_empty_message,
+                    locationText
+                ),
                 showRetry = true
             )
 
@@ -316,16 +345,17 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         hideStateCard()
         showRecyclerView()
 
+        resultLocationTextView.text = locationText
+
         showStatusText(
             getString(
-                R.string.status_found_pharmacies,
-                locationText,
+                R.string.status_found_pharmacies_compact,
                 state.pharmacies.size
             )
         )
 
         showDutyDateInfo(
-            dutyDateLabel = state.dutyDateLabel
+            dutyDate = state.dutyDate
         )
 
         showSourceInfo(
@@ -342,6 +372,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
     }
 
     private fun showError(message: String) {
+        resultSummaryCardView.visibility = View.GONE
         hideLoadingIndicator()
         hideRecyclerView()
         hideStatusText()
@@ -369,16 +400,6 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
     private fun hideStateCard() {
         stateCardView.visibility = View.GONE
         retryButton.visibility = View.GONE
-    }
-
-    private fun hideKeyboard() {
-        val inputMethodManager = requireContext()
-            .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-
-        inputMethodManager.hideSoftInputFromWindow(
-            requireView().windowToken,
-            0
-        )
     }
 
     // Helpers
@@ -465,6 +486,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
     }
 
     private fun showOnlyStateCard(title: String, message: String, showRetry: Boolean) {
+        resultSummaryCardView.visibility = View.GONE
         hideRecyclerView()
         hideStatusText()
         hideSourceInfo()
@@ -513,17 +535,67 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         sourceInfoRowLayout.visibility = View.GONE
     }
 
-    private fun showDutyDateInfo(dutyDateLabel: String) {
-        if (dutyDateLabel.isBlank()) {
+    private fun showDutyDateInfo(dutyDate: String) {
+        if (dutyDate.isBlank()) {
             hideDutyDateInfo()
             return
         }
 
         dutyDateTextView.visibility = View.VISIBLE
-        dutyDateTextView.text = getString(
-            R.string.duty_period,
-            dutyDateLabel
-        )
+        dutyDateTextView.text = formatDutyPeriod(dutyDate)
+    }
+
+    private fun formatDutyPeriod(dutyDate: String): String {
+        return try {
+            val locale = getCurrentLocale()
+
+            val inputFormatter = SimpleDateFormat(
+                "yyyy-MM-dd",
+                Locale.US
+            ).apply {
+                isLenient = false
+            }
+
+            val outputFormatter = SimpleDateFormat(
+                "d MMMM EEEE",
+                locale
+            )
+
+            val startDate = requireNotNull(
+                inputFormatter.parse(dutyDate)
+            )
+
+            val calendar = Calendar.getInstance().apply {
+                time = startDate
+            }
+
+            val formattedStartDate = outputFormatter.format(
+                calendar.time
+            )
+
+            calendar.add(Calendar.DAY_OF_MONTH, 1)
+
+            val formattedEndDate = outputFormatter.format(
+                calendar.time
+            )
+
+            getString(
+                R.string.duty_period_value,
+                formattedStartDate,
+                formattedEndDate
+            )
+        } catch (_: Exception) {
+            dutyDate
+        }
+    }
+
+    private fun getCurrentLocale(): Locale {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            resources.configuration.locales[0]
+        } else {
+            @Suppress("DEPRECATION")
+            resources.configuration.locale
+        }
     }
 
     private fun hideDutyDateInfo() {

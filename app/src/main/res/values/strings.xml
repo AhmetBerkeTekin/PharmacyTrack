@@ -23,7 +23,9 @@
     <string name="data_source_unknown">Bilinmiyor</string>
     <string name="district_filter_all">Tüm ilçeler</string>
     <string name="district_filter_hint">İlçe</string>
-    <string name="duty_period">Nöbet zamanı: %1$s</string>
+    <string name="duty_period_value">%1$s akşamından\n%2$s sabahına kadar</string>
+    <string name="duty_period_title">Nöbet aralığı</string>
+
 
     <!-- e -->
     <string name="error_address_not_found">Adres bilgisi bulunamadı.</string>
@@ -71,4 +73,5 @@
     <string name="state_loading_message">Nöbetçi eczane bilgileri getiriliyor.</string>
     <string name="state_loading_title">Eczaneler yükleniyor</string>
     <string name="status_found_pharmacies">%1$s için %2$d nöbetçi eczane bulundu.</string>
+    <string name="status_found_pharmacies_compact">%1$d nöbetçi eczane</string>
 </resources>

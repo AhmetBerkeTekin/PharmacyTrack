@@ -118,17 +118,6 @@ class PharmacyViewModel @Inject constructor(
         }
     }
 
-    fun refreshCurrentCity() {
-        if (currentCity.isBlank()) {
-            return
-        }
-
-        getPharmacies(
-            city = currentCity,
-            forceRefresh = true
-        )
-    }
-
     fun selectDistrict(district: String?) {
         selectedDistrict = district
 
