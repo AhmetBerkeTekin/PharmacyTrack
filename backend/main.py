@@ -1,3 +1,6 @@
+import asyncio
+import logging
+from contextlib import asynccontextmanager, suppress
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -5,10 +8,6 @@ import httpx
 from bs4 import BeautifulSoup, NavigableString
 from fastapi import FastAPI, HTTPException
 
-import asyncio
-import logging
-from contextlib import asynccontextmanager
-from contextlib import suppress
 
 LOGGER = logging.getLogger("uvicorn.error")
 
@@ -45,6 +44,20 @@ TURKISH_DAYS = {
     6: "Pazar",
 }
 
+cache: dict[str, dict] = {}
+
+
+class SourceAccessBlockedError(Exception):
+    """Kaynak site isteği Cloudflare veya benzeri bir koruma tarafından engellendi."""
+
+
+class SourceCityNotFoundError(Exception):
+    """Kaynak sitede istenen şehre ait sayfa bulunamadı."""
+
+
+def normalize_text(value: str) -> str:
+    return " ".join(value.split()).strip()
+
 
 def format_turkish_date(value) -> str:
     return (
@@ -64,12 +77,6 @@ def build_duty_date_label(now: datetime) -> str:
         f"{format_turkish_date(tomorrow)} sabahına kadar"
     )
 
-cache = {}
-
-
-def normalize_text(value: str) -> str:
-    return " ".join(value.split()).strip()
-
 
 def get_today_marker(now: datetime) -> str:
     return f"{now.day} {TURKISH_MONTHS[now.month]}"
@@ -77,9 +84,8 @@ def get_today_marker(now: datetime) -> str:
 
 def find_today_container(
     soup: BeautifulSoup,
-    now: datetime
+    now: datetime,
 ):
-
     active_panes = soup.select(
         ".tab-pane.show.active, .tab-pane.active"
     )
@@ -105,7 +111,12 @@ def find_today_container(
         if not is_today_label:
             continue
 
-        next_table = text_node.parent.find_next("table")
+        parent = text_node.parent
+
+        if parent is None:
+            continue
+
+        next_table = parent.find_next("table")
 
         if (
             next_table is not None
@@ -121,12 +132,13 @@ def find_today_container(
 
     if len(pharmacy_tables) == 1:
         return pharmacy_tables[0]
-    
+
     return None
 
+
 def parse_pharmacies(container) -> list[dict]:
-    pharmacy_list = []
-    seen_pharmacies = set()
+    pharmacy_list: list[dict] = []
+    seen_pharmacies: set[tuple[str, str, str, str]] = set()
 
     for box in container.select("td.border-bottom"):
         name_tag = box.find("span", class_="isim")
@@ -149,7 +161,7 @@ def parse_pharmacies(container) -> list[dict]:
 
         phone_divs = box.find_all(
             "div",
-            class_="col-lg-3"
+            class_="col-lg-3",
         )
 
         phone = (
@@ -163,7 +175,7 @@ def parse_pharmacies(container) -> list[dict]:
         address = ""
         address_div = box.find(
             "div",
-            class_="col-lg-6"
+            class_="col-lg-6",
         )
 
         if address_div:
@@ -185,7 +197,11 @@ def parse_pharmacies(container) -> list[dict]:
             district.casefold(),
             name.casefold(),
             address.casefold(),
-            "".join(character for character in phone if character.isdigit()),
+            "".join(
+                character
+                for character in phone
+                if character.isdigit()
+            ),
         )
 
         if pharmacy_key in seen_pharmacies:
@@ -204,6 +220,153 @@ def parse_pharmacies(container) -> list[dict]:
 
     return pharmacy_list
 
+
+async def fetch_city_data(
+    city: str,
+    now: datetime,
+) -> dict | None:
+    target_url = (
+        f"https://www.eczaneler.gen.tr/nobetci-{city}"
+    )
+
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/131.0.0.0 Safari/537.36"
+        ),
+        "Accept": (
+            "text/html,application/xhtml+xml,"
+            "application/xml;q=0.9,"
+            "image/avif,image/webp,*/*;q=0.8"
+        ),
+        "Accept-Language": (
+            "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7"
+        ),
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+        "Referer": "https://www.eczaneler.gen.tr/",
+        "Upgrade-Insecure-Requests": "1",
+    }
+
+    async with httpx.AsyncClient(
+        timeout=20.0,
+        follow_redirects=True,
+    ) as client:
+        response = await client.get(
+            target_url,
+            headers=headers,
+        )
+
+    LOGGER.info(
+        (
+            "Source response city=%s status=%s "
+            "url=%s content_type=%s length=%s"
+        ),
+        city,
+        response.status_code,
+        response.url,
+        response.headers.get("content-type"),
+        len(response.text),
+    )
+
+    if response.status_code == 404:
+        raise SourceCityNotFoundError(
+            f"Source city page not found. city={city}"
+        )
+
+    cloudflare_challenge = (
+        response.status_code == 403
+        and (
+            "Just a moment" in response.text
+            or "challenges.cloudflare.com" in response.text
+        )
+    )
+
+    if cloudflare_challenge:
+        LOGGER.warning(
+            (
+                "Source access blocked by Cloudflare. "
+                "city=%s status=%s"
+            ),
+            city,
+            response.status_code,
+        )
+
+        raise SourceAccessBlockedError(
+            f"Source access blocked. city={city}"
+        )
+
+    if response.status_code != 200:
+        LOGGER.warning(
+            (
+                "Source request failed. "
+                "city=%s status=%s body=%r"
+            ),
+            city,
+            response.status_code,
+            response.text[:500],
+        )
+
+        return None
+
+    soup = BeautifulSoup(
+        response.text,
+        "html.parser",
+    )
+
+    today_container = find_today_container(
+        soup=soup,
+        now=now,
+    )
+
+    if today_container is None:
+        LOGGER.warning(
+            (
+                "Today container not found. "
+                "city=%s title=%r "
+                "pharmacy_cell_count=%s "
+                "active_pane_count=%s"
+            ),
+            city,
+            (
+                soup.title.get_text(" ", strip=True)
+                if soup.title
+                else None
+            ),
+            len(soup.select("td.border-bottom")),
+            len(
+                soup.select(
+                    ".tab-pane.show.active, .tab-pane.active"
+                )
+            ),
+        )
+
+        return None
+
+    pharmacies = parse_pharmacies(
+        today_container
+    )
+
+    if not pharmacies:
+        LOGGER.warning(
+            (
+                "No pharmacies parsed. "
+                "city=%s container_length=%s"
+            ),
+            city,
+            len(str(today_container)),
+        )
+
+        return None
+
+    return {
+        "duty_date": now.date().isoformat(),
+        "duty_date_label": build_duty_date_label(now),
+        "pharmacies": pharmacies,
+    }
+
+
 async def refresh_cached_cities() -> None:
     cached_cities = list(cache.keys())
 
@@ -220,7 +383,9 @@ async def refresh_cached_cities() -> None:
 
     for city in cached_cities:
         try:
-            now = datetime.now(ISTANBUL_TIMEZONE)
+            now = datetime.now(
+                ISTANBUL_TIMEZONE
+            )
 
             result = await fetch_city_data(
                 city=city,
@@ -229,7 +394,10 @@ async def refresh_cached_cities() -> None:
 
             if result is None:
                 LOGGER.warning(
-                    "Scheduled refresh failed. city=%s",
+                    (
+                        "Scheduled refresh returned no data. "
+                        "city=%s"
+                    ),
                     city,
                 )
                 continue
@@ -237,25 +405,54 @@ async def refresh_cached_cities() -> None:
             cache[city] = {
                 "checked_at": now,
                 "duty_date": result["duty_date"],
-                "duty_date_label": result["duty_date_label"],
+                "duty_date_label": result[
+                    "duty_date_label"
+                ],
                 "pharmacies": result["pharmacies"],
             }
 
             LOGGER.info(
-                "Scheduled refresh completed. city=%s pharmacy_count=%s",
+                (
+                    "Scheduled refresh completed. "
+                    "city=%s pharmacy_count=%s"
+                ),
                 city,
                 len(result["pharmacies"]),
             )
 
-        except Exception:
-            LOGGER.exception(
-                "Unexpected scheduled refresh error. city=%s",
+        except SourceAccessBlockedError:
+            LOGGER.warning(
+                (
+                    "Scheduled refresh blocked by source. "
+                    "city=%s"
+                ),
                 city,
             )
 
-        await asyncio.sleep(1)    
-        
-def get_next_refresh_time(now: datetime) -> datetime:
+        except SourceCityNotFoundError:
+            LOGGER.warning(
+                (
+                    "Scheduled refresh city not found. "
+                    "city=%s"
+                ),
+                city,
+            )
+
+        except Exception:
+            LOGGER.exception(
+                (
+                    "Unexpected scheduled refresh error. "
+                    "city=%s"
+                ),
+                city,
+            )
+
+        await asyncio.sleep(1)
+
+
+def get_next_refresh_time(
+    now: datetime,
+) -> datetime:
     for hour, minute in REFRESH_TIMES:
         candidate = now.replace(
             hour=hour,
@@ -275,12 +472,18 @@ def get_next_refresh_time(now: datetime) -> datetime:
         minute=first_minute,
         second=0,
         microsecond=0,
-    ) 
+    )
+
 
 async def scheduled_cache_refresh_loop() -> None:
     while True:
-        now = datetime.now(ISTANBUL_TIMEZONE)
-        next_refresh = get_next_refresh_time(now)
+        now = datetime.now(
+            ISTANBUL_TIMEZONE
+        )
+
+        next_refresh = get_next_refresh_time(
+            now
+        )
 
         wait_seconds = max(
             0,
@@ -292,12 +495,18 @@ async def scheduled_cache_refresh_loop() -> None:
             next_refresh.isoformat(),
         )
 
-        await asyncio.sleep(wait_seconds)
+        await asyncio.sleep(
+            wait_seconds
+        )
+
         await refresh_cached_cities()
+
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    LOGGER.info("Pharmacy cache scheduler started.")
+    LOGGER.info(
+        "Pharmacy cache scheduler started."
+    )
 
     refresh_task = asyncio.create_task(
         scheduled_cache_refresh_loop()
@@ -306,140 +515,120 @@ async def lifespan(_app: FastAPI):
     try:
         yield
     finally:
-        LOGGER.info("Pharmacy cache scheduler stopping.")
+        LOGGER.info(
+            "Pharmacy cache scheduler stopping."
+        )
 
         refresh_task.cancel()
 
         with suppress(asyncio.CancelledError):
             await refresh_task
 
-app = FastAPI(lifespan=lifespan)
 
-async def fetch_city_data(
-    city: str,
-    now: datetime
-) -> dict | None:
-    target_url = f"https://www.eczaneler.gen.tr/nobetci-{city}"
-
-    headers = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/131.0.0.0 Safari/537.36"
-    ),
-    "Accept": (
-        "text/html,application/xhtml+xml,application/xml;q=0.9,"
-        "image/avif,image/webp,*/*;q=0.8"
-    ),
-    "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7",
-    "Cache-Control": "no-cache",
-    "Pragma": "no-cache",
-    "Referer": "https://www.eczaneler.gen.tr/",
-    "Upgrade-Insecure-Requests": "1",
-}
-
-    async with httpx.AsyncClient(
-        timeout=20.0,
-        follow_redirects=True
-    ) as client:
-        response = await client.get(
-            target_url,
-            headers=headers
-        )
-
-    LOGGER.info(
-    "Source response city=%s status=%s url=%s content_type=%s length=%s",
-    city,
-    response.status_code,
-    response.url,
-    response.headers.get("content-type"),
-    len(response.text),
+app = FastAPI(
+    title="PharmacyTrack API",
+    version="1.0.0",
+    lifespan=lifespan,
 )
 
-    if response.status_code != 200:
-        LOGGER.warning(
-        "Source request failed. city=%s status=%s body=%r",
-        city,
-        response.status_code,
-        response.text[:500],
-        )
-        return None
 
-    soup = BeautifulSoup(response.text, "html.parser")
-
-    today_container = find_today_container(
-        soup=soup,
-        now=now
-    )
-
-    if today_container is None:
-        LOGGER.warning(
-        "Today container not found. city=%s title=%r "
-        "pharmacy_cell_count=%s active_pane_count=%s body=%r",
-        city,
-        soup.title.get_text(" ", strip=True) if soup.title else None,
-        len(soup.select("td.border-bottom")),
-        len(soup.select(".tab-pane.show.active, .tab-pane.active")),
-        response.text[:500],
-    )
-
-    pharmacies = parse_pharmacies(today_container)
-
-    if not pharmacies:
-        LOGGER.warning(
-        "No pharmacies parsed. city=%s container_length=%s",
-        city,
-        len(str(today_container)),
-    )
-
+@app.get("/")
+async def health_check():
     return {
-        "duty_date": now.date().isoformat(),
-        "duty_date_label": build_duty_date_label(now),
-        "pharmacies": pharmacies,
+        "status": "ok",
+        "service": "pharmacy-track-api",
     }
 
 
 @app.get("/pharmacies/{city}")
 async def get_pharmacies(city: str):
     normalized_city = city.strip().lower()
-    now = datetime.now(ISTANBUL_TIMEZONE)
-    today = now.date().isoformat()
 
-    cached_entry = cache.get(normalized_city)
+    if not normalized_city:
+        raise HTTPException(
+            status_code=400,
+            detail="City must not be empty.",
+        )
+
+    now = datetime.now(
+        ISTANBUL_TIMEZONE
+    )
+
+    today = now.date().isoformat()
+    cached_entry = cache.get(
+        normalized_city
+    )
 
     cache_is_valid = (
-    cached_entry is not None
-    and cached_entry["duty_date"] == today
+        cached_entry is not None
+        and cached_entry["duty_date"] == today
     )
 
     if cache_is_valid:
         return {
             "city": normalized_city.capitalize(),
             "source": "cache",
-            "checked_at": cached_entry["checked_at"].strftime("%H:%M"),
-            "duty_date": cached_entry["duty_date"],
-            "duty_date_label": cached_entry["duty_date_label"],
-            "pharmacies": cached_entry["pharmacies"],
+            "checked_at": cached_entry[
+                "checked_at"
+            ].strftime("%H:%M"),
+            "duty_date": cached_entry[
+                "duty_date"
+            ],
+            "duty_date_label": cached_entry[
+                "duty_date_label"
+            ],
+            "pharmacies": cached_entry[
+                "pharmacies"
+            ],
         }
 
-    result = await fetch_city_data(
-        city=normalized_city,
-        now=now
-    )
+    try:
+        result = await fetch_city_data(
+            city=normalized_city,
+            now=now,
+        )
 
-    if result is None:
+    except SourceCityNotFoundError as exception:
         raise HTTPException(
             status_code=404,
             detail=(
                 f"City '{normalized_city.capitalize()}' "
-                "not found or today's pharmacy data could not be parsed."
+                "was not found in the pharmacy data source."
+            ),
+        ) from exception
+
+    except SourceAccessBlockedError as exception:
+        LOGGER.warning(
+            (
+                "Pharmacy source blocked the server request. "
+                "city=%s"
+            ),
+            normalized_city,
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail=(
+                "Pharmacy data source temporarily "
+                "rejected the server request."
+            ),
+        ) from exception
+
+    if result is None:
+        raise HTTPException(
+            status_code=502,
+            detail=(
+                "Pharmacy data source could not "
+                "be reached or parsed."
             ),
         )
 
     cache[normalized_city] = {
         "checked_at": now,
         "duty_date": result["duty_date"],
-        "duty_date_label": result["duty_date_label"],
+        "duty_date_label": result[
+            "duty_date_label"
+        ],
         "pharmacies": result["pharmacies"],
     }
 
@@ -448,13 +637,8 @@ async def get_pharmacies(city: str):
         "source": "live",
         "checked_at": now.strftime("%H:%M"),
         "duty_date": result["duty_date"],
-        "duty_date_label": result["duty_date_label"],
+        "duty_date_label": result[
+            "duty_date_label"
+        ],
         "pharmacies": result["pharmacies"],
-    }
-
-@app.get("/")
-async def health_check():
-    return {
-        "status": "ok",
-        "service": "pharmacy-track-api"
     }
