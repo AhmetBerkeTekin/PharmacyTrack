@@ -49,6 +49,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
     private lateinit var resultLocationTextView: TextView
     private lateinit var retryButton: MaterialButton
     private lateinit var offlineWarningCardView: MaterialCardView
+    private lateinit var offlineWarningTextView: TextView
 
     private var isUpdatingDistrictDropdown = false
     private var shouldScroll = false // Consider using a scroll event instead
@@ -85,6 +86,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         resultLocationTextView = view.findViewById(R.id.resultLocationTextView)
         retryButton = view.findViewById(R.id.retryButton)
         offlineWarningCardView = view.findViewById(R.id.offlineWarningCardView)
+        offlineWarningTextView = view.findViewById(R.id.offlineWarningTextView)
     }
 
     private fun setupCityDropdown() {
@@ -319,12 +321,18 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
     private fun showSuccess(state: PharmacyUiState.Success) {
         resultSummaryCardView.visibility = View.VISIBLE
         stateCardView.visibility = View.GONE
-        offlineWarningCardView.visibility =
-            if (state.isOffline) {
-                View.VISIBLE
+        offlineWarningCardView.visibility = if (state.isOffline) View.VISIBLE else View.GONE
+
+        if (state.isOffline) {
+            offlineWarningTextView.text = if (state.isStale) {
+                getString(
+                    R.string.offline_stale_warning,
+                    formatOfflineDutyDate(state.dutyDate)
+                )
             } else {
-                View.GONE
+                getString(R.string.offline_cache_warning)
             }
+        }
 
         hideContentState()
         resetSearchButton()
@@ -572,5 +580,28 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
 
     private fun hideDutyDateInfo() {
         dutyDateTextView.visibility = View.GONE
+    }
+
+    private fun formatOfflineDutyDate(dutyDate: String): String {
+        return try {
+            val inputFormatter = SimpleDateFormat(
+                "yyyy-MM-dd",
+                Locale.US
+            ).apply {
+                isLenient = false
+            }
+
+            val outputFormatter = SimpleDateFormat(
+                "d MMMM yyyy",
+                resources.configuration.locales[0]
+            )
+
+            val date = inputFormatter.parse(dutyDate)
+                ?: return dutyDate
+
+            outputFormatter.format(date)
+        } catch (_: Exception) {
+            dutyDate
+        }
     }
 }

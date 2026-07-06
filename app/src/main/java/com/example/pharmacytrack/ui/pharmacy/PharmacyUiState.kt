@@ -10,6 +10,7 @@ sealed interface PharmacyUiState {
         val city: String,
         val dutyDate: String,
         val isOffline: Boolean,
+        val isStale: Boolean,
         val pharmacies: List<PharmacyUiModel>,
         val districtOptions: List<String>,
         val selectedDistrict: String?

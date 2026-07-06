@@ -22,6 +22,10 @@ import com.example.pharmacytrack.data.mapper.resolveCityName
 import com.example.pharmacytrack.data.mapper.resolveDutyDate
 import com.example.pharmacytrack.data.mapper.toSafePharmacyList
 
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
 @HiltViewModel
 class PharmacyViewModel @Inject constructor(
     private val repository: PharmacyRepository,
@@ -170,6 +174,7 @@ class PharmacyViewModel @Inject constructor(
             city = currentCity,
             dutyDate = currentDutyDate,
             isOffline = currentIsOffline,
+            isStale = currentIsOffline && isDutyDateStale(currentDutyDate),
             pharmacies = filteredPharmacies.toUiModels(
                 city = currentCity,
                 favoriteKeys = favoriteKeys
@@ -184,6 +189,32 @@ class PharmacyViewModel @Inject constructor(
             favoriteStore.toggleFavorite(
                 pharmacy.toFavoritePharmacy()
             )
+        }
+    }
+
+    private fun isDutyDateStale(dutyDate: String): Boolean {
+        if (dutyDate.isBlank()) {
+            return true
+        }
+
+        val formatter = SimpleDateFormat(
+            "yyyy-MM-dd",
+            Locale.US
+        ).apply {
+            isLenient = false
+        }
+
+        return try {
+            val cachedDate = formatter.parse(dutyDate)
+                ?: return true
+
+            val todayText = formatter.format(Date())
+            val today = formatter.parse(todayText)
+                ?: return true
+
+            cachedDate.before(today)
+        } catch (_: Exception) {
+            true
         }
     }
 }
