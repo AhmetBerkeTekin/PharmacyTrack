@@ -322,12 +322,21 @@ async def fetch_city_data(
     target_url = f"https://www.eczaneler.gen.tr/nobetci-{city}"
 
     headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/91.0.4472.124 Safari/537.36"
-        )
-    }
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/131.0.0.0 Safari/537.36"
+    ),
+    "Accept": (
+        "text/html,application/xhtml+xml,application/xml;q=0.9,"
+        "image/avif,image/webp,*/*;q=0.8"
+    ),
+    "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache",
+    "Referer": "https://www.eczaneler.gen.tr/",
+    "Upgrade-Insecure-Requests": "1",
+}
 
     async with httpx.AsyncClient(
         timeout=20.0,
@@ -338,7 +347,22 @@ async def fetch_city_data(
             headers=headers
         )
 
+    LOGGER.info(
+    "Source response city=%s status=%s url=%s content_type=%s length=%s",
+    city,
+    response.status_code,
+    response.url,
+    response.headers.get("content-type"),
+    len(response.text),
+)
+
     if response.status_code != 200:
+        LOGGER.warning(
+        "Source request failed. city=%s status=%s body=%r",
+        city,
+        response.status_code,
+        response.text[:500],
+        )
         return None
 
     soup = BeautifulSoup(response.text, "html.parser")
@@ -349,12 +373,24 @@ async def fetch_city_data(
     )
 
     if today_container is None:
-        return None
+        LOGGER.warning(
+        "Today container not found. city=%s title=%r "
+        "pharmacy_cell_count=%s active_pane_count=%s body=%r",
+        city,
+        soup.title.get_text(" ", strip=True) if soup.title else None,
+        len(soup.select("td.border-bottom")),
+        len(soup.select(".tab-pane.show.active, .tab-pane.active")),
+        response.text[:500],
+    )
 
     pharmacies = parse_pharmacies(today_container)
 
     if not pharmacies:
-        return None
+        LOGGER.warning(
+        "No pharmacies parsed. city=%s container_length=%s",
+        city,
+        len(str(today_container)),
+    )
 
     return {
         "duty_date": now.date().isoformat(),
