@@ -10,16 +10,22 @@ import java.net.SocketTimeoutException
 import javax.inject.Inject
 
 class PharmacyRepository @Inject constructor(
-    private val apiService: PharmacyApiService,
+    private val apiService: PharmacyApiService
 ) {
 
     companion object {
         private const val TAG = "PharmacyRepository"
     }
 
-    suspend fun getPharmacies(city: String, forceRefresh: Boolean = false): AppResult<PharmacyResponse> {
+    suspend fun getPharmacies(
+        city: String,
+        forceRefresh: Boolean = false
+    ): AppResult<PharmacyResponse> {
         return try {
-            val response = apiService.getPharmaciesByCity(city.trim(), forceRefresh = forceRefresh)
+            val response = apiService.getPharmaciesByCity(
+                city = city.trim(),
+                forceRefresh = forceRefresh
+            )
 
             if (response.isSuccessful) {
                 val body = response.body()
@@ -31,21 +37,56 @@ class PharmacyRepository @Inject constructor(
                 }
             } else {
                 AppResult.Error(
-                    AppError.Http(
+                    mapHttpError(
                         code = response.code(),
                         message = response.message()
                     )
                 )
             }
-        } catch (e: SocketTimeoutException) {
-            Logger.E(TAG, "Timeout while getting pharmacies. city=$city! R: " + e.message)
+        } catch (exception: SocketTimeoutException) {
+            Logger.E(
+                TAG,
+                "Timeout while getting pharmacies. city=$city R: ${exception.message}"
+            )
+
             AppResult.Error(AppError.Timeout)
-        } catch (e: IOException) {
-            Logger.E(TAG, "Unknown error while getting pharmacies. city=$city! R: " + e.message)
+        } catch (exception: IOException) {
+            Logger.E(
+                TAG,
+                "Network error while getting pharmacies. city=$city R: ${exception.message}"
+            )
+
             AppResult.Error(AppError.Network)
-        } catch (e: Exception) {
-            Logger.E(TAG, "Unknown error while getting pharmacies. city=$city! R: " + e.message)
-            AppResult.Error(AppError.Unknown(e))
+        } catch (exception: Exception) {
+            Logger.E(
+                TAG,
+                "Unknown error while getting pharmacies. city=$city R: ${exception.message}"
+            )
+
+            AppResult.Error(
+                AppError.Unknown(exception)
+            )
+        }
+    }
+
+    private fun mapHttpError(
+        code: Int,
+        message: String?
+    ): AppError {
+        return when (code) {
+            404 -> AppError.NotFound
+
+            408,
+            504 -> AppError.Timeout
+
+            429 -> AppError.TooManyRequests
+
+            in 500..599 -> AppError.Server
+
+            else -> AppError.Http(
+                code = code,
+                message = message
+            )
         }
     }
 }

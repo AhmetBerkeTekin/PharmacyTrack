@@ -17,17 +17,23 @@ fun AppError.toUiText(): UiText {
             UiText.StringResource(R.string.error_empty_response)
         }
 
+        AppError.NotFound -> {
+            UiText.StringResource(R.string.error_not_found)
+        }
+
+        AppError.TooManyRequests -> {
+            UiText.StringResource(R.string.error_too_many_requests)
+        }
+
+        AppError.Server -> {
+            UiText.StringResource(R.string.error_server)
+        }
+
         is AppError.Http -> {
-            when (code) {
-                404 -> UiText.StringResource(R.string.error_city_not_found)
-
-                in 500..599 -> UiText.StringResource(R.string.error_server)
-
-                else -> UiText.StringResource(
-                    resId = R.string.error_request_failed,
-                    args = listOf(code)
-                )
-            }
+            UiText.StringResource(
+                resId = R.string.error_request_failed,
+                args = listOf(code)
+            )
         }
 
         is AppError.Unknown -> {

@@ -100,6 +100,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
             isCursorVisible = false
 
             setOnClickListener {
+                requestFocus()
                 showDropDown()
             }
 
@@ -117,6 +118,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         }
 
         cityInputLayout.setEndIconOnClickListener {
+            cityEditText.requestFocus()
             cityEditText.showDropDown()
         }
     }
@@ -127,6 +129,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
             isCursorVisible = false
 
             setOnClickListener {
+                requestFocus()
                 showDropDown()
             }
 
@@ -156,6 +159,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         }
 
         districtInputLayout.setEndIconOnClickListener {
+            districtAutoCompleteTextView.requestFocus()
             districtAutoCompleteTextView.showDropDown()
         }
     }

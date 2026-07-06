@@ -39,6 +39,8 @@
     <string name="error_server">Sunucuda geçici bir sorun var. Lütfen tekrar dene.</string>
     <string name="error_timeout">Sunucudan cevap alınamadı. Lütfen biraz sonra tekrar dene.</string>
     <string name="error_unknown">Beklenmeyen bir hata oluştu. Lütfen tekrar dene.</string>
+    <string name="error_not_found">Bu şehir için bugüne ait nöbetçi eczane bilgisi bulunamadı.</string>
+    <string name="error_too_many_requests">Çok fazla istek gönderildi. Lütfen kısa bir süre sonra tekrar deneyin.</string>
 
     <!-- f -->
     <string name="favorite_add">Favorilere ekle</string>
