@@ -56,7 +56,7 @@ class PharmacyViewModel @Inject constructor(
         }
     }
 
-    fun getPharmacies(city: String, forceRefresh: Boolean = false) {
+    fun getPharmacies(city: String) {
         val normalizedCity = city.trim()
 
         if (normalizedCity.isBlank()) {
@@ -70,7 +70,7 @@ class PharmacyViewModel @Inject constructor(
             _uiState.value = PharmacyUiState.Loading
 
             val apiCitySlug = normalizedCity.toApiCitySlug()
-            val result = repository.getPharmacies(apiCitySlug, forceRefresh)
+            val result = repository.getPharmacies(apiCitySlug)
 
             when (result) {
                 is AppResult.Success -> {
@@ -146,10 +146,7 @@ class PharmacyViewModel @Inject constructor(
 
         hasTriedAutoLoadLastCity = true
 
-        getPharmacies(
-            city = city,
-            forceRefresh = false
-        )
+        getPharmacies(city = city)
 
         return true
     }
