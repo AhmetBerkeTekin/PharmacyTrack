@@ -54,6 +54,9 @@
     <string name="nav_label_favorites">Favoriler</string>
     <string name="nav_label_pharmacies">Nöbetçi Eczaneler</string>
 
+    <!-- o -->
+    <string name="offline_cache_warning">İnternet bağlantısı yok. Son kaydedilen liste gösteriliyor. Bilgiler güncel olmayabilir; gitmeden önce eczaneyi arayın.</string>
+
     <!-- p -->
     <string name="pharmacy_card_sample_district">İlçe</string>
     <string name="pharmacy_card_sample_name">Eczane adı</string>

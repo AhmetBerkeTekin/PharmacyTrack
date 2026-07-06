@@ -39,6 +39,7 @@ class PharmacyViewModel @Inject constructor(
     private var selectedDistrict: String? = null
     val lastCityFlow = userPreferences.lastCityFlow
     private var favoriteKeys: Set<String> = emptySet()
+    private var currentIsOffline: Boolean = false
 
     init {
         observeFavoriteKeys()
@@ -81,6 +82,11 @@ class PharmacyViewModel @Inject constructor(
                     )
 
                     currentDutyDate = response.resolveDutyDate()
+
+                    currentIsOffline = response.source.equals(
+                        other = "offline",
+                        ignoreCase = true
+                    )
 
                     allPharmacies = response.toSafePharmacyList()
 
@@ -163,6 +169,7 @@ class PharmacyViewModel @Inject constructor(
         _uiState.value = PharmacyUiState.Success(
             city = currentCity,
             dutyDate = currentDutyDate,
+            isOffline = currentIsOffline,
             pharmacies = filteredPharmacies.toUiModels(
                 city = currentCity,
                 favoriteKeys = favoriteKeys

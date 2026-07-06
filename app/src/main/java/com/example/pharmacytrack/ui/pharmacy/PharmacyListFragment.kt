@@ -48,6 +48,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
     private lateinit var dutyDateTextView: TextView
     private lateinit var resultLocationTextView: TextView
     private lateinit var retryButton: MaterialButton
+    private lateinit var offlineWarningCardView: MaterialCardView
 
     private var isUpdatingDistrictDropdown = false
     private var shouldScroll = false // Consider using a scroll event instead
@@ -83,6 +84,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
         dutyDateTextView = view.findViewById(R.id.dutyDateTextView)
         resultLocationTextView = view.findViewById(R.id.resultLocationTextView)
         retryButton = view.findViewById(R.id.retryButton)
+        offlineWarningCardView = view.findViewById(R.id.offlineWarningCardView)
     }
 
     private fun setupCityDropdown() {
@@ -280,6 +282,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
 
     private fun showIdle() {
         resultSummaryCardView.visibility = View.GONE
+        offlineWarningCardView.visibility = View.GONE
         hideLoadingIndicator()
         hideRecyclerView()
         hideStatusText()
@@ -297,6 +300,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
 
     private fun showLoading() {
         resultSummaryCardView.visibility = View.GONE
+        offlineWarningCardView.visibility = View.GONE
         showLoadingIndicator()
         hideRecyclerView()
         hideStatusText()
@@ -315,6 +319,13 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
     private fun showSuccess(state: PharmacyUiState.Success) {
         resultSummaryCardView.visibility = View.VISIBLE
         stateCardView.visibility = View.GONE
+        offlineWarningCardView.visibility =
+            if (state.isOffline) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+
         hideContentState()
         resetSearchButton()
         showDistrictFilters(state)
@@ -366,6 +377,7 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
 
     private fun showError(message: String) {
         resultSummaryCardView.visibility = View.GONE
+        offlineWarningCardView.visibility = View.GONE
         hideLoadingIndicator()
         hideRecyclerView()
         hideStatusText()
