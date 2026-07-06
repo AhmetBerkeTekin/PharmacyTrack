@@ -1,0 +1,424 @@
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+import httpx
+from bs4 import BeautifulSoup, NavigableString
+from fastapi import FastAPI, HTTPException
+
+import asyncio
+import logging
+from contextlib import asynccontextmanager
+from contextlib import suppress
+
+LOGGER = logging.getLogger("uvicorn.error")
+
+ISTANBUL_TIMEZONE = ZoneInfo("Europe/Istanbul")
+
+REFRESH_TIMES = (
+    (0, 5),
+    (8, 0),
+    (18, 5),
+)
+
+TURKISH_MONTHS = {
+    1: "Ocak",
+    2: "Şubat",
+    3: "Mart",
+    4: "Nisan",
+    5: "Mayıs",
+    6: "Haziran",
+    7: "Temmuz",
+    8: "Ağustos",
+    9: "Eylül",
+    10: "Ekim",
+    11: "Kasım",
+    12: "Aralık",
+}
+
+TURKISH_DAYS = {
+    0: "Pazartesi",
+    1: "Salı",
+    2: "Çarşamba",
+    3: "Perşembe",
+    4: "Cuma",
+    5: "Cumartesi",
+    6: "Pazar",
+}
+
+
+def format_turkish_date(value) -> str:
+    return (
+        f"{value.day} "
+        f"{TURKISH_MONTHS[value.month]} "
+        f"{value.year} "
+        f"{TURKISH_DAYS[value.weekday()]}"
+    )
+
+
+def build_duty_date_label(now: datetime) -> str:
+    today = now.date()
+    tomorrow = today + timedelta(days=1)
+
+    return (
+        f"{format_turkish_date(today)} mesai bitiminden "
+        f"{format_turkish_date(tomorrow)} sabahına kadar"
+    )
+
+cache = {}
+
+
+def normalize_text(value: str) -> str:
+    return " ".join(value.split()).strip()
+
+
+def get_today_marker(now: datetime) -> str:
+    return f"{now.day} {TURKISH_MONTHS[now.month]}"
+
+
+def find_today_container(
+    soup: BeautifulSoup,
+    now: datetime
+):
+
+    active_panes = soup.select(
+        ".tab-pane.show.active, .tab-pane.active"
+    )
+
+    for pane in active_panes:
+        if pane.select_one("td.border-bottom"):
+            return pane
+
+    today_marker = get_today_marker(now)
+
+    for text_node in soup.find_all(string=True):
+        text = normalize_text(str(text_node))
+
+        if not text:
+            continue
+
+        is_today_label = (
+            today_marker in text
+            and "kadar" in text.lower()
+            and not text.lower().startswith("bu sayfada")
+        )
+
+        if not is_today_label:
+            continue
+
+        next_table = text_node.parent.find_next("table")
+
+        if (
+            next_table is not None
+            and next_table.select_one("td.border-bottom")
+        ):
+            return next_table
+
+    pharmacy_tables = [
+        table
+        for table in soup.find_all("table")
+        if table.select_one("td.border-bottom")
+    ]
+
+    if len(pharmacy_tables) == 1:
+        return pharmacy_tables[0]
+    
+    return None
+
+def parse_pharmacies(container) -> list[dict]:
+    pharmacy_list = []
+    seen_pharmacies = set()
+
+    for box in container.select("td.border-bottom"):
+        name_tag = box.find("span", class_="isim")
+
+        if not name_tag:
+            continue
+
+        name = normalize_text(
+            name_tag.get_text(" ", strip=True)
+        )
+
+        district_tag = box.find("span", class_="bg-info")
+        district = (
+            normalize_text(
+                district_tag.get_text(" ", strip=True)
+            )
+            if district_tag
+            else ""
+        )
+
+        phone_divs = box.find_all(
+            "div",
+            class_="col-lg-3"
+        )
+
+        phone = (
+            normalize_text(
+                phone_divs[-1].get_text(" ", strip=True)
+            )
+            if len(phone_divs) > 1
+            else ""
+        )
+
+        address = ""
+        address_div = box.find(
+            "div",
+            class_="col-lg-6"
+        )
+
+        if address_div:
+            direct_texts = [
+                normalize_text(str(content))
+                for content in address_div.contents
+                if isinstance(content, NavigableString)
+                and normalize_text(str(content))
+            ]
+
+            if direct_texts:
+                address = direct_texts[0]
+            else:
+                address = normalize_text(
+                    address_div.get_text(" ", strip=True)
+                )
+
+        pharmacy_key = (
+            district.casefold(),
+            name.casefold(),
+            address.casefold(),
+            "".join(character for character in phone if character.isdigit()),
+        )
+
+        if pharmacy_key in seen_pharmacies:
+            continue
+
+        seen_pharmacies.add(pharmacy_key)
+
+        pharmacy_list.append(
+            {
+                "district": district,
+                "name": name,
+                "address": address,
+                "phone": phone,
+            }
+        )
+
+    return pharmacy_list
+
+async def refresh_cached_cities() -> None:
+    cached_cities = list(cache.keys())
+
+    if not cached_cities:
+        LOGGER.info(
+            "Scheduled refresh skipped because cache is empty."
+        )
+        return
+
+    LOGGER.info(
+        "Scheduled refresh started. city_count=%s",
+        len(cached_cities),
+    )
+
+    for city in cached_cities:
+        try:
+            now = datetime.now(ISTANBUL_TIMEZONE)
+
+            result = await fetch_city_data(
+                city=city,
+                now=now,
+            )
+
+            if result is None:
+                LOGGER.warning(
+                    "Scheduled refresh failed. city=%s",
+                    city,
+                )
+                continue
+
+            cache[city] = {
+                "checked_at": now,
+                "duty_date": result["duty_date"],
+                "duty_date_label": result["duty_date_label"],
+                "pharmacies": result["pharmacies"],
+            }
+
+            LOGGER.info(
+                "Scheduled refresh completed. city=%s pharmacy_count=%s",
+                city,
+                len(result["pharmacies"]),
+            )
+
+        except Exception:
+            LOGGER.exception(
+                "Unexpected scheduled refresh error. city=%s",
+                city,
+            )
+
+        await asyncio.sleep(1)    
+        
+def get_next_refresh_time(now: datetime) -> datetime:
+    for hour, minute in REFRESH_TIMES:
+        candidate = now.replace(
+            hour=hour,
+            minute=minute,
+            second=0,
+            microsecond=0,
+        )
+
+        if candidate > now:
+            return candidate
+
+    tomorrow = now + timedelta(days=1)
+    first_hour, first_minute = REFRESH_TIMES[0]
+
+    return tomorrow.replace(
+        hour=first_hour,
+        minute=first_minute,
+        second=0,
+        microsecond=0,
+    ) 
+
+async def scheduled_cache_refresh_loop() -> None:
+    while True:
+        now = datetime.now(ISTANBUL_TIMEZONE)
+        next_refresh = get_next_refresh_time(now)
+
+        wait_seconds = max(
+            0,
+            (next_refresh - now).total_seconds(),
+        )
+
+        LOGGER.info(
+            "Next scheduled refresh: %s",
+            next_refresh.isoformat(),
+        )
+
+        await asyncio.sleep(wait_seconds)
+        await refresh_cached_cities()
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    LOGGER.info("Pharmacy cache scheduler started.")
+
+    refresh_task = asyncio.create_task(
+        scheduled_cache_refresh_loop()
+    )
+
+    try:
+        yield
+    finally:
+        LOGGER.info("Pharmacy cache scheduler stopping.")
+
+        refresh_task.cancel()
+
+        with suppress(asyncio.CancelledError):
+            await refresh_task
+
+app = FastAPI(lifespan=lifespan)
+
+async def fetch_city_data(
+    city: str,
+    now: datetime
+) -> dict | None:
+    target_url = f"https://www.eczaneler.gen.tr/nobetci-{city}"
+
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/91.0.4472.124 Safari/537.36"
+        )
+    }
+
+    async with httpx.AsyncClient(
+        timeout=20.0,
+        follow_redirects=True
+    ) as client:
+        response = await client.get(
+            target_url,
+            headers=headers
+        )
+
+    if response.status_code != 200:
+        return None
+
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    today_container = find_today_container(
+        soup=soup,
+        now=now
+    )
+
+    if today_container is None:
+        return None
+
+    pharmacies = parse_pharmacies(today_container)
+
+    if not pharmacies:
+        return None
+
+    return {
+        "duty_date": now.date().isoformat(),
+        "duty_date_label": build_duty_date_label(now),
+        "pharmacies": pharmacies,
+    }
+
+
+@app.get("/pharmacies/{city}")
+async def get_pharmacies(city: str):
+    normalized_city = city.strip().lower()
+    now = datetime.now(ISTANBUL_TIMEZONE)
+    today = now.date().isoformat()
+
+    cached_entry = cache.get(normalized_city)
+
+    cache_is_valid = (
+    cached_entry is not None
+    and cached_entry["duty_date"] == today
+    )
+
+    if cache_is_valid:
+        return {
+            "city": normalized_city.capitalize(),
+            "source": "cache",
+            "checked_at": cached_entry["checked_at"].strftime("%H:%M"),
+            "duty_date": cached_entry["duty_date"],
+            "duty_date_label": cached_entry["duty_date_label"],
+            "pharmacies": cached_entry["pharmacies"],
+        }
+
+    result = await fetch_city_data(
+        city=normalized_city,
+        now=now
+    )
+
+    if result is None:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                f"City '{normalized_city.capitalize()}' "
+                "not found or today's pharmacy data could not be parsed."
+            ),
+        )
+
+    cache[normalized_city] = {
+        "checked_at": now,
+        "duty_date": result["duty_date"],
+        "duty_date_label": result["duty_date_label"],
+        "pharmacies": result["pharmacies"],
+    }
+
+    return {
+        "city": normalized_city.capitalize(),
+        "source": "live",
+        "checked_at": now.strftime("%H:%M"),
+        "duty_date": result["duty_date"],
+        "duty_date_label": result["duty_date_label"],
+        "pharmacies": result["pharmacies"],
+    }
+
+@app.get("/")
+async def health_check():
+    return {
+        "status": "ok",
+        "service": "pharmacy-track-api"
+    }
