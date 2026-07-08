@@ -8,8 +8,7 @@ from zoneinfo import ZoneInfo
 
 import httpx
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
-
+from fastapi import FastAPI, HTTPException, Query
 
 load_dotenv()
 
@@ -260,6 +259,76 @@ def build_client_response(cache_entry: dict,source: str,) -> dict:
         ],
     }
 
+def to_optional_int(value) -> int | None:
+    if value is None:
+        return None
+
+    try:
+        return int(round(float(value)))
+    except (TypeError, ValueError):
+        return None
+
+
+def map_provider_pharmacy(
+    item: dict,
+    include_distance: bool = False,
+) -> dict | None:
+    if not isinstance(item, dict):
+        return None
+
+    pharmacy_name = str(
+        item.get("ad") or ""
+    ).strip()
+
+    if not pharmacy_name:
+        return None
+
+    location = item.get("konum")
+
+    if not isinstance(location, dict):
+        location = {}
+
+    pharmacy = {
+        "provider_id": item.get("id"),
+        "city": str(
+            item.get("il") or ""
+        ).strip(),
+        "city_slug": str(
+            item.get("il_slug") or ""
+        ).strip(),
+        "district": str(
+            item.get("ilce") or ""
+        ).strip(),
+        "district_slug": str(
+            item.get("ilce_slug") or ""
+        ).strip(),
+        "name": pharmacy_name,
+        "address": str(
+            item.get("adres") or ""
+        ).strip(),
+        "phone": str(
+            item.get("telefon") or ""
+        ).strip(),
+        "directions": str(
+            item.get("tarif") or ""
+        ).strip(),
+        "latitude": to_optional_float(
+            location.get("lat")
+        ),
+        "longitude": to_optional_float(
+            location.get("lng")
+        ),
+    }
+
+    if include_distance:
+        pharmacy["distance_meters"] = (
+            to_optional_int(
+                item.get("mesafe")
+            )
+        )
+
+    return pharmacy
+
 
 async def fetch_provider_city(city_slug: str,) -> dict:
     if http_client is None:
@@ -371,52 +440,12 @@ async def fetch_provider_city(city_slug: str,) -> dict:
     pharmacies: list[dict] = []
 
     for item in provider_items:
-        if not isinstance(item, dict):
-            continue
-
-        location = item.get("konum")
-
-        if not isinstance(location, dict):
-            location = {}
-
-        pharmacy_name = str(
-            item.get("ad") or ""
-        ).strip()
-
-        if not pharmacy_name:
-            continue
-
-        pharmacies.append(
-            {
-                "district": str(
-                    item.get("ilce") or ""
-                ).strip(),
-                "name": pharmacy_name,
-                "address": str(
-                    item.get("adres") or ""
-                ).strip(),
-                "phone": str(
-                    item.get("telefon") or ""
-                ).strip(),
-
-                "provider_id": item.get("id"),
-                "city_slug": str(
-                    item.get("il_slug") or ""
-                ).strip(),
-                "district_slug": str(
-                    item.get("ilce_slug") or ""
-                ).strip(),
-                "directions": str(
-                    item.get("tarif") or ""
-                ).strip(),
-                "latitude": to_optional_float(
-                    location.get("lat")
-                ),
-                "longitude": to_optional_float(
-                    location.get("lng")
-                ),
-            }
+        pharmacy = map_provider_pharmacy(
+            item=item
         )
+
+        if pharmacy is not None:
+            pharmacies.append(pharmacy)
 
     return {
         "city": city_name,
@@ -426,6 +455,122 @@ async def fetch_provider_city(city_slug: str,) -> dict:
         ),
         "is_previous_day": bool(
             payload.get("onceki_gun", False)
+        ),
+        "pharmacies": pharmacies,
+    }
+
+async def fetch_provider_nearby(
+    latitude: float,
+    longitude: float,
+    radius: int,
+) -> dict:
+    if http_client is None:
+        raise ProviderConfigurationError(
+            "HTTP client is not initialized."
+        )
+
+    response = await http_client.get(
+        "/v1/konum",
+        params={
+            "lat": latitude,
+            "lng": longitude,
+            "radius": radius,
+        },
+    )
+
+    LOGGER.info(
+        (
+            "NobetEcza nearby response "
+            "lat=%s lng=%s radius=%s "
+            "status=%s length=%s"
+        ),
+        latitude,
+        longitude,
+        radius,
+        response.status_code,
+        len(response.content),
+    )
+
+    if response.status_code in (401, 403):
+        raise ProviderAuthenticationError(
+            "NobetEcza authentication failed."
+        )
+
+    if response.status_code == 429:
+        raise ProviderRateLimitError(
+            "NobetEcza request limit exceeded."
+        )
+
+    if response.status_code >= 500:
+        raise ProviderUnavailableError(
+            (
+                "NobetEcza service unavailable. "
+                f"status={response.status_code}"
+            )
+        )
+
+    if response.status_code != 200:
+        LOGGER.warning(
+            (
+                "Unexpected NobetEcza nearby response. "
+                "status=%s body=%r"
+            ),
+            response.status_code,
+            response.text[:500],
+        )
+
+        raise ProviderResponseError(
+            (
+                "Unexpected provider response. "
+                f"status={response.status_code}"
+            )
+        )
+
+    try:
+        payload = response.json()
+    except ValueError as exception:
+        raise ProviderResponseError(
+            "Provider returned invalid JSON."
+        ) from exception
+
+    if payload.get("success") is not True:
+        LOGGER.warning(
+            "NobetEcza nearby request unsuccessful. payload=%r",
+            payload,
+        )
+
+        raise ProviderResponseError(
+            "Provider returned unsuccessful result."
+        )
+
+    provider_items = payload.get("data")
+
+    if not isinstance(provider_items, list):
+        raise ProviderResponseError(
+            "Provider data field is not a list."
+        )
+
+    pharmacies: list[dict] = []
+
+    for item in provider_items:
+        pharmacy = map_provider_pharmacy(
+            item=item,
+            include_distance=True,
+        )
+
+        if pharmacy is not None:
+            pharmacies.append(pharmacy)
+
+    duty_date = str(
+        payload.get("tarih") or ""
+    ).strip()
+
+    return {
+        "duty_date": duty_date,
+        "duty_date_label": (
+            build_duty_date_label(duty_date)
+            if duty_date
+            else ""
         ),
         "pharmacies": pharmacies,
     }
@@ -593,6 +738,119 @@ async def health_check():
         "service": "pharmacy-track-api",
     }
 
+@app.get("/pharmacies/nearby")
+async def get_nearby_pharmacies(
+    latitude: float = Query(
+        ...,
+        ge=-90,
+        le=90,
+    ),
+    longitude: float = Query(
+        ...,
+        ge=-180,
+        le=180,
+    ),
+    radius: int = Query(
+        3000,
+        ge=100,
+        le=50000,
+        description="Search radius in meters.",
+    ),
+):
+    now = datetime.now(
+        ISTANBUL_TIMEZONE
+    )
+
+    try:
+        provider_result = (
+            await fetch_provider_nearby(
+                latitude=latitude,
+                longitude=longitude,
+                radius=radius,
+            )
+        )
+
+    except ProviderAuthenticationError as exception:
+        LOGGER.exception(
+            "NobetEcza authentication failed."
+        )
+
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Pharmacy data service "
+                "is not configured correctly."
+            ),
+        ) from exception
+
+    except ProviderRateLimitError as exception:
+        LOGGER.warning(
+            "NobetEcza request limit exceeded."
+        )
+
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Pharmacy data request "
+                "limit was exceeded."
+            ),
+        ) from exception
+
+    except httpx.TimeoutException as exception:
+        raise HTTPException(
+            status_code=504,
+            detail=(
+                "Pharmacy data provider "
+                "timed out."
+            ),
+        ) from exception
+
+    except httpx.RequestError as exception:
+        LOGGER.exception(
+            "Could not connect to NobetEcza."
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail=(
+                "Pharmacy data provider "
+                "could not be reached."
+            ),
+        ) from exception
+
+    except (
+        ProviderUnavailableError,
+        ProviderResponseError,
+        ProviderConfigurationError,
+    ) as exception:
+        LOGGER.exception(
+            "NobetEcza nearby provider error."
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail=(
+                "Pharmacy data provider "
+                "returned an invalid response."
+            ),
+        ) from exception
+
+    return {
+        "source": "live",
+        "checked_at": now.strftime("%H:%M"),
+        "latitude": latitude,
+        "longitude": longitude,
+        "radius": radius,
+        "duty_date": provider_result[
+            "duty_date"
+        ],
+        "duty_date_label": provider_result[
+            "duty_date_label"
+        ],
+        "pharmacies": provider_result[
+            "pharmacies"
+        ],
+    }
 
 @app.get("/pharmacies/{city}")
 async def get_pharmacies(city: str):
