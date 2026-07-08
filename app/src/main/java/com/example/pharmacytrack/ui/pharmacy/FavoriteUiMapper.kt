@@ -9,21 +9,29 @@ fun PharmacyUiModel.toFavoritePharmacy(): FavoritePharmacy {
         district = district,
         name = name,
         address = address,
-        phone = phone
+        phone = phone,
+        providerId = providerId,
+        districtSlug = districtSlug,
+        directions = directions,
+        latitude = latitude,
+        longitude = longitude
     )
 }
 
 fun FavoritePharmacy.toPharmacyUiModel(): PharmacyUiModel {
-    val favoriteKeyValue = favoriteKey.orEmpty()
-
     return PharmacyUiModel(
         city = city.orEmpty(),
         district = district.orEmpty(),
         name = name.orEmpty(),
         address = address.orEmpty(),
         phone = phone.orEmpty(),
-        favoriteKey = favoriteKeyValue,
-        isFavorite = true
+        favoriteKey = favoriteKey.orEmpty(),
+        isFavorite = true,
+        providerId = providerId,
+        districtSlug = districtSlug.orEmpty(),
+        directions = directions.orEmpty(),
+        latitude = latitude,
+        longitude = longitude
     )
 }
 
