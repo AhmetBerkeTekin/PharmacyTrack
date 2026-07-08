@@ -29,7 +29,7 @@ android {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                "\"http://192.168.1.32:8000/\""
+                "\"https://pharmacy-track-api.onrender.com/\""
             )
         }
 
@@ -39,7 +39,7 @@ android {
             buildConfigField(
                 "String",
                 "BASE_URL",
-                "\"http://192.168.1.32:8000/\""
+                "\"https://pharmacy-track-api.onrender.com/\""
             )
 
             proguardFiles(

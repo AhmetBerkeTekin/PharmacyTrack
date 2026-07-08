@@ -24,10 +24,17 @@ fun PharmacyResponse.toCacheEntities(
                 dutyDate = cachedDutyDate,
                 dutyDateLabel = cachedDutyDateLabel,
                 cachedAtMillis = cachedAtMillis,
+
                 district = pharmacy.district.orEmpty(),
                 name = pharmacy.name.orEmpty(),
                 address = pharmacy.address.orEmpty(),
-                phone = pharmacy.phone.orEmpty()
+                phone = pharmacy.phone.orEmpty(),
+
+                providerId = pharmacy.providerId,
+                districtSlug = pharmacy.districtSlug.orEmpty(),
+                directions = pharmacy.directions.orEmpty(),
+                latitude = pharmacy.latitude,
+                longitude = pharmacy.longitude
             )
         }
 }
@@ -43,10 +50,15 @@ fun List<CachedPharmacyEntity>.toOfflineResponse(): PharmacyResponse? {
         dutyDateLabel = firstItem.dutyDateLabel,
         pharmacies = map { entity ->
             Pharmacy(
+                providerId = entity.providerId,
                 district = entity.district,
+                districtSlug = entity.districtSlug,
                 name = entity.name,
                 address = entity.address,
-                phone = entity.phone
+                phone = entity.phone,
+                directions = entity.directions,
+                latitude = entity.latitude,
+                longitude = entity.longitude
             )
         }
     )

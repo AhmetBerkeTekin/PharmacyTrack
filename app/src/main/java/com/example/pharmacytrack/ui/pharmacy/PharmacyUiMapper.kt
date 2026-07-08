@@ -3,7 +3,10 @@ package com.example.pharmacytrack.ui.pharmacy
 import com.example.pharmacytrack.core.text.toTurkishSearchKey
 import com.example.pharmacytrack.data.model.Pharmacy
 
-fun List<Pharmacy>.toUiModels(city: String, favoriteKeys: Set<String>): List<PharmacyUiModel> {
+fun List<Pharmacy>.toUiModels(
+    city: String,
+    favoriteKeys: Set<String>
+): List<PharmacyUiModel> {
     return map { pharmacy ->
         pharmacy.toUiModel(
             city = city,
@@ -12,7 +15,10 @@ fun List<Pharmacy>.toUiModels(city: String, favoriteKeys: Set<String>): List<Pha
     }
 }
 
-private fun Pharmacy.toUiModel(city: String, favoriteKeys: Set<String>): PharmacyUiModel {
+private fun Pharmacy.toUiModel(
+    city: String,
+    favoriteKeys: Set<String>
+): PharmacyUiModel {
     val cityValue = city.trim()
     val districtValue = district.orEmpty().trim()
     val nameValue = name.orEmpty().trim()
@@ -34,7 +40,13 @@ private fun Pharmacy.toUiModel(city: String, favoriteKeys: Set<String>): Pharmac
         address = addressValue,
         phone = phoneValue,
         favoriteKey = favoriteKey,
-        isFavorite = favoriteKey in favoriteKeys
+        isFavorite = favoriteKey in favoriteKeys,
+
+        providerId = providerId,
+        districtSlug = districtSlug.orEmpty().trim(),
+        directions = directions.orEmpty().trim(),
+        latitude = latitude,
+        longitude = longitude
     )
 }
 

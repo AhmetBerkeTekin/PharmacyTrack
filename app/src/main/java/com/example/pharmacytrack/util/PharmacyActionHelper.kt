@@ -35,50 +35,88 @@ object PharmacyActionHelper {
         }
     }
 
-    fun openMap(context: Context, name: String?, address: String?, district: String?, city: String?) {
-        val query = listOfNotNull(
+    fun openMap(
+        context: Context,
+        name: String?,
+        address: String?,
+        district: String?,
+        city: String?,
+        latitude: Double? = null,
+        longitude: Double? = null
+    ) {
+        val hasCoordinates = latitude != null && longitude != null
+
+        val addressQuery = listOfNotNull(
             name?.takeIf { it.isNotBlank() },
             address?.takeIf { it.isNotBlank() },
             district?.takeIf { it.isNotBlank() },
             city?.takeIf { it.isNotBlank() }
         ).joinToString(" ")
 
-        if (query.isBlank()) {
-            Toast.makeText(
-                context,
-                context.getString(R.string.error_address_not_found),
-                Toast.LENGTH_SHORT
-            ).show()
+        if (!hasCoordinates && addressQuery.isBlank()) {
+            showToast(context, R.string.error_address_not_found)
             return
         }
 
-        val encodedQuery = Uri.encode(query)
+        val mapUri = if (hasCoordinates) {
+            val label = name.orEmpty().trim()
+
+            if (label.isNotBlank()) {
+                Uri.parse(
+                    "geo:$latitude,$longitude" +
+                            "?q=$latitude,$longitude(${Uri.encode(label)})"
+                )
+            } else {
+                Uri.parse(
+                    "geo:$latitude,$longitude?q=$latitude,$longitude"
+                )
+            }
+        } else {
+            Uri.parse(
+                "geo:0,0?q=${Uri.encode(addressQuery)}"
+            )
+        }
 
         val mapIntent = Intent(
             Intent.ACTION_VIEW,
-            Uri.parse("geo:0,0?q=$encodedQuery")
+            mapUri
         )
 
         try {
             context.startActivity(mapIntent)
         } catch (e: ActivityNotFoundException) {
-            Logger.E(TAG, "Map app not found. " + e.message)
+            Logger.E(
+                TAG,
+                "Map app not found. ${e.message}"
+            )
+
+            val webQuery = if (hasCoordinates) {
+                "$latitude,$longitude"
+            } else {
+                addressQuery
+            }
 
             val webIntent = Intent(
                 Intent.ACTION_VIEW,
-                Uri.parse("https://www.google.com/maps/search/?api=1&query=$encodedQuery")
+                Uri.parse(
+                    "https://www.google.com/maps/search/" +
+                            "?api=1&query=${Uri.encode(webQuery)}"
+                )
             )
 
             try {
                 context.startActivity(webIntent)
             } catch (webException: ActivityNotFoundException) {
-                Logger.E(TAG, "Browser app not found for map fallback! " + webException.message)
+                Logger.E(
+                    TAG,
+                    "Browser app not found for map fallback! " +
+                            webException.message
+                )
 
-                Toast.makeText(
+                showToast(
                     context,
-                    context.getString(R.string.error_map_app_not_found),
-                    Toast.LENGTH_SHORT
-                ).show()
+                    R.string.error_map_app_not_found
+                )
             }
         }
     }

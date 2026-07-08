@@ -182,7 +182,9 @@ class PharmacyListFragment : Fragment(R.layout.fragment_pharmacy_list) {
                     name = pharmacy.name,
                     address = pharmacy.address,
                     district = pharmacy.district,
-                    city = pharmacy.city
+                    city = pharmacy.city,
+                    latitude = pharmacy.latitude,
+                    longitude = pharmacy.longitude
                 )
             },
             onFavoriteClicked = { pharmacy ->

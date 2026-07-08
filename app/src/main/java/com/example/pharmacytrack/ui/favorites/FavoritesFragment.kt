@@ -55,7 +55,9 @@ class FavoritesFragment : Fragment(R.layout.fragment_favorites) {
                     name = pharmacy.name,
                     address = pharmacy.address,
                     district = pharmacy.district,
-                    city = pharmacy.city
+                    city = pharmacy.city,
+                    latitude = pharmacy.latitude,
+                    longitude = pharmacy.longitude
                 )
             },
             onFavoriteClicked = { pharmacy ->

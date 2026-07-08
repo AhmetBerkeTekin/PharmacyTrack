@@ -23,5 +23,11 @@ data class CachedPharmacyEntity(
     val district: String,
     val name: String,
     val address: String,
-    val phone: String
+    val phone: String,
+
+    val providerId: Long? = null,
+    val districtSlug: String = "",
+    val directions: String = "",
+    val latitude: Double? = null,
+    val longitude: Double? = null
 )

@@ -36,17 +36,14 @@ fun PharmacyResponse.resolveDutyDateLabel(): String {
 
 private fun Pharmacy.toSafePharmacy(): Pharmacy {
     return Pharmacy(
+        providerId = providerId,
         district = district.orEmpty().trim(),
+        districtSlug = districtSlug.orEmpty().trim(),
         name = name.orEmpty().trim(),
         address = address.orEmpty().trim(),
-        phone = phone.orEmpty().trim()
+        phone = phone.orEmpty().trim(),
+        directions = directions.orEmpty().trim(),
+        latitude = latitude,
+        longitude = longitude
     )
-}
-
-private fun String.toDisplayCityName(): String {
-    return trim()
-        .lowercase()
-        .replaceFirstChar { firstChar ->
-            firstChar.uppercase()
-        }
 }

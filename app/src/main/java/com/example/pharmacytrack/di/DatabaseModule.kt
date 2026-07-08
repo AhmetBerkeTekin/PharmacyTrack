@@ -23,8 +23,12 @@ object DatabaseModule {
         return Room.databaseBuilder(
             context,
             PharmacyDatabase::class.java,
-            "pharmacy_track.db"
-        ).build()
+            "pharmacy_database"
+        )
+            .addMigrations(
+                PharmacyDatabase.MIGRATION_1_2
+            )
+            .build()
     }
 
     @Provides
