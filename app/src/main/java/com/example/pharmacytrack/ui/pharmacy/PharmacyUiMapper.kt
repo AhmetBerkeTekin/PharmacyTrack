@@ -15,6 +15,17 @@ fun List<Pharmacy>.toUiModels(
     }
 }
 
+fun List<Pharmacy>.toNearbyUiModels(
+    favoriteKeys: Set<String>
+): List<PharmacyUiModel> {
+    return map { pharmacy ->
+        pharmacy.toUiModel(
+            city = pharmacy.city.orEmpty(),
+            favoriteKeys = favoriteKeys
+        )
+    }
+}
+
 private fun Pharmacy.toUiModel(
     city: String,
     favoriteKeys: Set<String>
@@ -41,12 +52,12 @@ private fun Pharmacy.toUiModel(
         phone = phoneValue,
         favoriteKey = favoriteKey,
         isFavorite = favoriteKey in favoriteKeys,
-
         providerId = providerId,
         districtSlug = districtSlug.orEmpty().trim(),
         directions = directions.orEmpty().trim(),
         latitude = latitude,
-        longitude = longitude
+        longitude = longitude,
+        distanceMeters = distanceMeters
     )
 }
 

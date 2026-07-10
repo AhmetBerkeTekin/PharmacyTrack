@@ -15,6 +15,9 @@
     <string name="button_search_short">Ara</string>
     <string name="button_call">Telefon Et</string>
     <string name="button_open_map">Haritada Aç</string>
+    <string name="button_find_nearby_pharmacies">Yakınımdaki Eczaneleri Göster</string>
+    <string name="bottom_nav_nearby">Yakınımda</string>
+    <string name="bottom_nav_city_search">Şehir Ara</string>
 
     <!-- c -->
     <string name="city_filter_hint">Şehir</string>
@@ -41,6 +44,12 @@
     <string name="error_unknown">Beklenmeyen bir hata oluştu. Lütfen tekrar dene.</string>
     <string name="error_not_found">Bu şehir için bugüne ait nöbetçi eczane bilgisi bulunamadı.</string>
     <string name="error_too_many_requests">Çok fazla istek gönderildi. Lütfen kısa bir süre sonra tekrar deneyin.</string>
+    <string name="error_location_unavailable">Konumunuz alınamadı. Telefonunuzun konum özelliğinin açık olduğundan emin olun.</string>
+    <string name="error_network_connection">İnternet bağlantınızı kontrol edip tekrar deneyin.</string>
+    <string name="error_unexpected">Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.</string>
+    <string name="error_pharmacy_service_busy">Nöbetçi eczane servisi şu anda yoğun. Lütfen biraz sonra tekrar deneyin.</string>
+    <string name="error_pharmacy_service_unavailable">Nöbetçi eczane servisine şu anda ulaşılamıyor. Lütfen tekrar deneyin.</string>
+    <string name="error_nearby_pharmacies_failed">Yakındaki nöbetçi eczaneler alınamadı. Lütfen tekrar deneyin.</string>
 
     <!-- f -->
     <string name="favorite_add">Favorilere ekle</string>
@@ -51,8 +60,24 @@
     <string name="favorites_title">Favori Eczaneler</string>
 
     <!-- n -->
-    <string name="nav_label_favorites">Favoriler</string>
-    <string name="nav_label_pharmacies">Nöbetçi Eczaneler</string>
+    <string name="nearby_screen_title">Yakındaki Nöbetçi Eczaneler</string>
+    <string name="nearby_screen_message">Konumunuza en yakın nöbetçi eczaneler mesafeye göre sıralanır.</string>
+    <string name="nearby_preparing_title">Hazırlanıyor</string>
+    <string name="nearby_preparing_message">Yakındaki nöbetçi eczaneler hazırlanıyor.</string>
+    <string name="nearby_locating_title">Konumunuz belirleniyor</string>
+    <string name="nearby_locating_message">Size en yakın nöbetçi eczaneleri buluyoruz.</string>
+    <string name="nearby_loading_title">Eczaneler getiriliyor</string>
+    <string name="nearby_loading_message">Yakındaki nöbetçi eczaneler yükleniyor.</string>
+    <string name="nearby_permission_title">Konum izni gerekli</string>
+    <string name="nearby_permission_message">Yakındaki nöbetçi eczaneleri listeleyebilmemiz için konum izni vermeniz gerekiyor.</string>
+    <string name="nearby_permission_settings_message">Konum izni kapatılmış. Uygulama ayarlarından konum iznini açın.</string>
+    <string name="nearby_give_permission">Konum İzni Ver</string>
+    <string name="nearby_open_settings">Ayarları Aç</string>
+    <string name="nearby_found_pharmacies">%1$d nöbetçi eczane bulundu</string>
+    <string name="nearby_empty_title">Yakında eczane bulunamadı</string>
+    <string name="nearby_empty_message">10 kilometrelik alanda nöbetçi eczane bulunamadı. Şehir Ara ekranından diğer bölgeleri kontrol edebilirsiniz.</string>
+    <string name="nearby_error_title">Eczaneler alınamadı</string>
+    <string name="nearby_retry">Tekrar Dene</string>
 
     <!-- o -->
     <string name="offline_cache_warning">İnternet bağlantısı yok. Son kaydedilen liste gösteriliyor.</string>

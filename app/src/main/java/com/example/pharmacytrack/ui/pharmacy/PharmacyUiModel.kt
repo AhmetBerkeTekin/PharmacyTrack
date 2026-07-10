@@ -13,5 +13,6 @@ data class PharmacyUiModel(
     val districtSlug: String = "",
     val directions: String = "",
     val latitude: Double? = null,
-    val longitude: Double? = null
+    val longitude: Double? = null,
+    val distanceMeters: Int? = null
 )

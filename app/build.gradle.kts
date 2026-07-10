@@ -91,6 +91,8 @@ dependencies {
     ksp("androidx.room:room-compiler:$roomVersion")
 
     implementation("androidx.core:core-splashscreen:1.2.0")
+    implementation("com.google.android.gms:play-services-location:21.4.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.2")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

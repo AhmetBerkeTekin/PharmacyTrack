@@ -37,6 +37,8 @@ fun PharmacyResponse.resolveDutyDateLabel(): String {
 private fun Pharmacy.toSafePharmacy(): Pharmacy {
     return Pharmacy(
         providerId = providerId,
+        city = city.orEmpty().trim(),
+        citySlug = citySlug.orEmpty().trim(),
         district = district.orEmpty().trim(),
         districtSlug = districtSlug.orEmpty().trim(),
         name = name.orEmpty().trim(),
@@ -44,6 +46,7 @@ private fun Pharmacy.toSafePharmacy(): Pharmacy {
         phone = phone.orEmpty().trim(),
         directions = directions.orEmpty().trim(),
         latitude = latitude,
-        longitude = longitude
+        longitude = longitude,
+        distanceMeters = distanceMeters
     )
 }

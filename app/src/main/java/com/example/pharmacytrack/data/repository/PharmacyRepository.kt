@@ -21,6 +21,18 @@ class PharmacyRepository @Inject constructor(
         private const val TAG = "PharmacyRepository"
     }
 
+    suspend fun getNearbyPharmacies(
+        latitude: Double,
+        longitude: Double,
+        radius: Int = 10_000
+    ): PharmacyResponse {
+        return apiService.getNearbyPharmacies(
+            latitude = latitude,
+            longitude = longitude,
+            radius = radius
+        )
+    }
+
     suspend fun getPharmacies(
         city: String
     ): AppResult<PharmacyResponse> {

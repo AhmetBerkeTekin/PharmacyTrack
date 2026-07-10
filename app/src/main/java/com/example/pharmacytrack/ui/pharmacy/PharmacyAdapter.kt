@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.pharmacytrack.R
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
+import java.util.Locale
 
 class PharmacyAdapter(
     private val onCallClicked: (PharmacyUiModel) -> Unit,
@@ -24,8 +25,7 @@ class PharmacyAdapter(
         parent: ViewGroup,
         viewType: Int
     ): PharmacyViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_pharmacy, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_pharmacy, parent, false)
 
         return PharmacyViewHolder(
             itemView = view,
@@ -77,9 +77,17 @@ class PharmacyAdapter(
                 context.getString(R.string.pharmacy_unknown_name)
             }
 
-            districtChip.text = pharmacy.district.ifBlank {
-                context.getString(R.string.pharmacy_unknown_district)
+            val districtText = pharmacy.district.ifBlank {
+                context.getString(
+                    R.string.pharmacy_unknown_district
+                )
             }
+
+            districtChip.text = pharmacy.distanceMeters
+                ?.let { distanceMeters ->
+                    "$districtText · ${formatDistance(distanceMeters)}"
+                }
+                ?: districtText
 
             addressTextView.text = pharmacy.address.ifBlank {
                 context.getString(R.string.pharmacy_unknown_address)
@@ -124,6 +132,15 @@ class PharmacyAdapter(
 
             mapButton.setOnClickListener {
                 onMapClicked(pharmacy)
+            }
+        }
+
+        private fun formatDistance(
+            distanceMeters: Int
+        ): String {
+            return if (distanceMeters < 1000) { "$distanceMeters m"
+            } else {
+                String.format(Locale.getDefault(), "%.1f km", distanceMeters / 1000.0)
             }
         }
     }

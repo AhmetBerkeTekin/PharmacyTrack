@@ -2,16 +2,21 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/pharmacyListFragment">
+    app:startDestination="@id/nearbyPharmacyFragment">
+
+    <fragment
+        android:id="@+id/nearbyPharmacyFragment"
+        android:name="com.example.pharmacytrack.ui.nearby.NearbyPharmacyFragment"
+        android:label="@string/bottom_nav_nearby" />
 
     <fragment
         android:id="@+id/pharmacyListFragment"
         android:name="com.example.pharmacytrack.ui.pharmacy.PharmacyListFragment"
-        android:label="@string/nav_label_pharmacies" />
+        android:label="@string/bottom_nav_pharmacies" />
 
     <fragment
         android:id="@+id/favoritesFragment"
         android:name="com.example.pharmacytrack.ui.favorites.FavoritesFragment"
-        android:label="@string/nav_label_favorites" />
+        android:label="@string/bottom_nav_favorites" />
 
 </navigation>

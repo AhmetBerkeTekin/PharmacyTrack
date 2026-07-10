@@ -6,6 +6,12 @@ data class Pharmacy(
     @SerializedName("provider_id")
     val providerId: Long? = null,
 
+    @SerializedName("city")
+    val city: String? = null,
+
+    @SerializedName("city_slug")
+    val citySlug: String? = null,
+
     @SerializedName("district")
     val district: String?,
 
@@ -28,5 +34,8 @@ data class Pharmacy(
     val latitude: Double? = null,
 
     @SerializedName("longitude")
-    val longitude: Double? = null
+    val longitude: Double? = null,
+
+    @SerializedName("distance_meters")
+    val distanceMeters: Int? = null
 )

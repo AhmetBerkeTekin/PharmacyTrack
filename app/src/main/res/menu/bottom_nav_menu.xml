@@ -2,8 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/pharmacyListFragment"
+        android:id="@+id/nearbyPharmacyFragment"
         android:icon="@drawable/ic_location_24"
+        android:title="@string/bottom_nav_nearby" />
+
+    <item
+        android:id="@+id/pharmacyListFragment"
+        android:icon="@drawable/ic_search_24"
         android:title="@string/bottom_nav_pharmacies" />
 
     <item
